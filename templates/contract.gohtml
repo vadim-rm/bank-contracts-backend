@@ -9,8 +9,11 @@
     <title>Договоры</title>
 </head>
 <body>
+<div class="header">
+    <p>Банк</p>
+</div>
+<div class="header">{{ .contract.Name }}</div>
 <div class="space">
-    <div class="header">{{ .contract.Name }}</div>
     <div class="container">
         <img src="{{ .contract.ImageUrl }}" class="image">
         <p class="title">{{ .contract.Name }}</p>

@@ -9,20 +9,22 @@
     <title>Договоры</title>
 </head>
 <body>
+<div class="header">
+    <p>Банк</p>
+</div>
 <div class="space">
-    <div class="header"></div>
+    <h1>Вклады и счета</h1>
     <div class="container">
         {{ range $contract := .contracts }}
             <div class="card">
                 <div class="info">
                     <img src="{{ $contract.ImageUrl }}" class="image">
-                    <p class="title">{{ $contract.Name }}</p>
-                    {{/*                    <p class="short-description"></p>*/}}
                 </div>
                 <div class="down">
-                    <p>{{ $contract.AnnualRate }}%</p>
-                    <a href="/contracts/{{ $contract.Id }}" class="card-button">Подробнее</a>
+                    <p class="title">{{ $contract.Name }}</p>
+                    <p class="digit">{{ $contract.AnnualRate }}%</p>
                 </div>
+                <a href="/contracts/{{ $contract.Id }}" class="card-button">Подробнее</a>
             </div>
         {{ end }}
     </div>

@@ -8,11 +8,12 @@
 }
 
 body {
-    background: #EFEFEF;
+    background: #efefef;
 }
 
 .space {
     width: 80%;
+    margin-top: 16px;
     margin-left: auto;
     margin-right: auto;
 }
@@ -31,6 +32,7 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    gap: 8px;
 }
 
 .image {
@@ -41,7 +43,6 @@ body {
 }
 
 .title {
-    margin-top: 16px;
     font-size: 16px;
     font-weight: bold;
 }
@@ -65,11 +66,18 @@ body {
 
 .down {
     display: flex;
+    flex-direction: row;
     justify-content: space-between;
-    align-items: center;
+    align-items: end;
 }
 
-.down p {
+.digit {
     font-size: 24px;
     font-weight: 700;
+}
+
+.header {
+    padding: 20px;
+    width: 100%;
+    background: #FFFAFA;
 }
