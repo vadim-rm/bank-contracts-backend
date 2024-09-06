@@ -19,3 +19,7 @@ func NewOrderImpl(repository repository.Order) *OrderImpl {
 func (s *OrderImpl) GetById(ctx context.Context, id domain.OrderId) (domain.Order, error) {
 	return s.repository.GetById(ctx, id)
 }
+
+func (s *OrderImpl) GetCurrentDraft(ctx context.Context) (domain.OrderMeta, error) {
+	return s.repository.GetCurrentDraft(ctx)
+}

@@ -27,11 +27,12 @@ func Run() {
 
 	contractRepository := repository.NewContractImpl()
 	contractService := service.NewContractImpl(contractRepository)
-	contractHandler := handler.NewContractImpl(contractService)
 
 	orderRepository := repository.NewOrderImpl()
 	orderService := service.NewOrderImpl(orderRepository)
+
 	orderHandler := handler.NewOrderImpl(orderService)
+	contractHandler := handler.NewContractImpl(contractService, orderService)
 
 	engine := router.New(router.Config{
 		DebugCors:     cfg.App.Debug,

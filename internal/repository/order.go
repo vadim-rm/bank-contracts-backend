@@ -7,4 +7,5 @@ import (
 
 type Order interface {
 	GetById(ctx context.Context, id domain.OrderId) (domain.Order, error)
+	GetCurrentDraft(ctx context.Context) (domain.OrderMeta, error)
 }

@@ -100,8 +100,13 @@ h1 {
     border-radius: 12px;
 }
 
+
+.card-button.secondary {
+    color: #262626C0;
+}
+
 .card-button.secondary:hover {
-    color: #262626b3;
+    color: #262626EC;
 }
 
 .digit {
@@ -192,6 +197,7 @@ h1 {
     display: flex;
     flex-direction: column;
     gap: 24px;
+    margin-top: 36px;
 }
 
 hr {

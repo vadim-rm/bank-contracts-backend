@@ -10,12 +10,17 @@ import (
 )
 
 type ContractImpl struct {
-	service service.Contract
+	contractService service.Contract
+	orderService    service.Order
 }
 
-func NewContractImpl(service service.Contract) *ContractImpl {
+func NewContractImpl(
+	contractService service.Contract,
+	orderService service.Order,
+) *ContractImpl {
 	return &ContractImpl{
-		service: service,
+		contractService: contractService,
+		orderService:    orderService,
 	}
 }
 
@@ -35,9 +40,20 @@ func (h *ContractImpl) GetList(ctx *gin.Context) {
 		return
 	}
 
-	contracts, err := h.service.GetList(ctx, dto.ContractsFilter{
+	contracts, err := h.contractService.GetList(ctx, dto.ContractsFilter{
 		Name: request.Query,
 	})
+	if err != nil {
+		ctx.AbortWithStatusJSON(
+			http.StatusInternalServerError,
+			gin.H{
+				"error": err.Error(),
+			},
+		)
+		return
+	}
+
+	orderMeta, err := h.orderService.GetCurrentDraft(ctx)
 	if err != nil {
 		ctx.AbortWithStatusJSON(
 			http.StatusInternalServerError,
@@ -51,8 +67,8 @@ func (h *ContractImpl) GetList(ctx *gin.Context) {
 	ctx.HTML(http.StatusOK, "contracts.gohtml", gin.H{
 		"Contracts": contracts,
 		"Cart": gin.H{
-			"Id":    1,
-			"Count": 5,
+			"Id":    orderMeta.Id,
+			"Count": orderMeta.Count,
 		},
 		"Query": request.Query,
 	})
@@ -94,7 +110,18 @@ func (h *ContractImpl) GetById(ctx *gin.Context) {
 		return
 	}
 
-	contract, err := h.service.GetById(ctx, domain.ContractId(request.Id))
+	contract, err := h.contractService.GetById(ctx, domain.ContractId(request.Id))
+	if err != nil {
+		ctx.AbortWithStatusJSON(
+			http.StatusInternalServerError,
+			gin.H{
+				"error": err.Error(),
+			},
+		)
+		return
+	}
+
+	orderMeta, err := h.orderService.GetCurrentDraft(ctx)
 	if err != nil {
 		ctx.AbortWithStatusJSON(
 			http.StatusInternalServerError,
@@ -108,8 +135,8 @@ func (h *ContractImpl) GetById(ctx *gin.Context) {
 	ctx.HTML(http.StatusOK, "contract.gohtml", gin.H{
 		"Contract": contract,
 		"Cart": gin.H{
-			"Id":    1,
-			"Count": 5,
+			"Id":    orderMeta.Id,
+			"Count": orderMeta.Count,
 		},
 		"From": request.From,
 	})
