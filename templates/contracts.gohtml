@@ -9,25 +9,44 @@
     <title>Договоры</title>
 </head>
 <body>
-<div class="header">
-    <p>Банк</p>
-</div>
-<div class="space">
-    <h1>Вклады и счета</h1>
+{{template "header" .Cart}}
+<main>
+    <div class="search-row">
+        <h1>Вклады и счета</h1>
+        <form action="/contracts" method="get" class="search">
+            <input type="text" name="query" placeholder="Поиск" value="{{ .Query }}">
+        </form>
+    </div>
     <div class="container">
-        {{ range $contract := .contracts }}
+        {{ if not .Contracts }} По вашему запросу ничего не найдено {{ end }}
+        {{ $odd := false }}
+        {{ $query := .Query }}
+        {{ range $i, $contract := .Contracts }}
+            {{ $odd = not $odd }}
             <div class="card">
-                <div class="info">
-                    <img src="{{ $contract.ImageUrl }}" class="image">
+                {{ if $odd }}
+                    <img src="http://localhost:9000/main/{{ $contract.ImageId }}.png" class="image">
+                {{ end }}
+                <div class="description-column">
+                    <h2 class="title">{{ $contract.Name }}</h2>
+                    <p class="description">{{ $contract.Description }}</p>
+                    <div class="badge">
+                        <p class="digit">до {{ $contract.AnnualRate }}%</p>
+                        <p class="description">ставка годовых</p>
+                    </div>
+                    <div class="buttons-row">
+                        <a href="#" class="card-button primary disabled">Оформить</a>
+                        <a href="/contracts/{{ $contract.Id }}?from=/contracts?query={{ $query }}"
+                           class="card-button secondary">Подробнее
+                            ›</a>
+                    </div>
                 </div>
-                <div class="down">
-                    <p class="title">{{ $contract.Name }}</p>
-                    <p class="digit">{{ $contract.AnnualRate }}%</p>
-                </div>
-                <a href="/contracts/{{ $contract.Id }}" class="card-button">Подробнее</a>
+                {{ if not $odd }}
+                    <img src="http://localhost:9000/main/{{ $contract.ImageId }}.png" class="image">
+                {{ end }}
             </div>
         {{ end }}
     </div>
-</div>
+</main>
 </body>
 </html>

@@ -29,12 +29,16 @@ func Run() {
 	contractService := service.NewContractImpl(contractRepository)
 	contractHandler := handler.NewContractImpl(contractService)
 
+	orderRepository := repository.NewOrderImpl()
+	orderService := service.NewOrderImpl(orderRepository)
+	orderHandler := handler.NewOrderImpl(orderService)
+
 	engine := router.New(router.Config{
 		DebugCors:     cfg.App.Debug,
 		TemplatesPath: cfg.App.TemplatesPath,
 	})
 
-	external_routes.Initialize(engine, contractHandler)
+	external_routes.Initialize(engine, contractHandler, orderHandler)
 
 	srv := &http.Server{
 		Addr:    fmt.Sprintf("%s:%d", cfg.Http.Host, cfg.Http.Port),

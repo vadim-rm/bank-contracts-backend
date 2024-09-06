@@ -6,22 +6,24 @@
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link rel="stylesheet" href="/static/style.css"/>
-    <title>Договоры</title>
+    <title>{{ .Contract.Name }}</title>
 </head>
 <body>
-<div class="header">
-    <p>Банк</p>
-</div>
-<div class="header">{{ .contract.Name }}</div>
-<div class="space">
-    <div class="container">
-        <img src="{{ .contract.ImageUrl }}" class="image">
-        <p class="title">{{ .contract.Name }}</p>
-        <p class="short-description">{{ .contract.Description }}</p>
+{{template "header" .Cart}}
+<main>
+    <a href="{{ .From }}" class="card-button secondary">‹ Назад</a>
+    <div class="hero-row">
+        <img src="http://localhost:9000/main/{{ .Contract.ImageId }}.png" class="image">
+        <div class="hero-column">
+            <h2 class="title">{{ .Contract.Name }}</h2>
+            <p class="description">{{ .Contract.Description }}</p>
+            <div class="badge">
+                <p class="digit">до {{ .Contract.AnnualRate }}%</p>
+                <p class="description">ставка годовых</p>
+            </div>
+            <a href="#" class="card-button primary disabled">Оформить</a>
+        </div>
     </div>
-    <div class="down">
-        <p>{{ .contract.AnnualRate }}%</p>
-    </div>
-</div>
+</main>
 </body>
 </html>

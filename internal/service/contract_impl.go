@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"github.com/vadim-rm/bmstu-web-backend/internal/domain"
+	"github.com/vadim-rm/bmstu-web-backend/internal/dto"
 	"github.com/vadim-rm/bmstu-web-backend/internal/repository"
 )
 
@@ -16,8 +17,8 @@ func NewContractImpl(repository repository.Contract) *ContractImpl {
 	}
 }
 
-func (s *ContractImpl) GetList(ctx context.Context) ([]domain.ContractMeta, error) {
-	return s.repository.GetList(ctx)
+func (s *ContractImpl) GetList(ctx context.Context, filter dto.ContractsFilter) ([]domain.Contract, error) {
+	return s.repository.GetList(ctx, filter)
 }
 
 func (s *ContractImpl) GetById(ctx context.Context, id domain.ContractId) (domain.Contract, error) {

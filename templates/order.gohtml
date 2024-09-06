@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="/static/style.css"/>
+    <title>Заказ</title>
+</head>
+<body>
+{{template "header" .Cart}}
+<main>
+    <a href="/contracts" class="card-button secondary">‹ Назад</a>
+    <h1>Заказ</h1>
+    <div class="cart-column">
+        {{ range $i, $contract := .Contracts }}
+            <div class="card">
+                <img src="http://localhost:9000/main/{{ $contract.ImageId }}.png" class="image image-cart">
+                <div class="description-column">
+                    <h2>{{ $contract.Name }}</h2>
+                    <div class="badge">
+                        <p class="digit">до {{ $contract.AnnualRate }}%</p>
+                        <p class="description">ставка годовых</p>
+                    </div>
+                    <div class="buttons-row">
+                        <a href="/contracts/{{ $contract.Id }}?from=/orders/{{ .Id }}" class="card-button secondary">Подробнее</a>
+                        <a href="#" class="card-button primary disabled">Удалить</a>
+                    </div>
+                </div>
+            </div>
+            <hr>
+        {{end}}
+        <div class="buttons-row">
+            <a href="#" class="card-button secondary">Очистить</a>
+            <a href="#" class="card-button primary disabled">Оформить заявку</a>
+        </div>
+    </div>
+</main>
+</body>
+</html>
