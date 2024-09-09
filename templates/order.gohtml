@@ -14,6 +14,7 @@
     <a href="/contracts" class="card-button secondary">‹ Назад</a>
     <h1>Заказ</h1>
     <div class="cart-column">
+        {{ $orderId := .Id }}
         {{ range $i, $contract := .Contracts }}
             <div class="card">
                 <img src="http://localhost:9000/main/{{ $contract.ImageId }}.png" class="image image-cart">
@@ -24,7 +25,8 @@
                         <p class="description">ставка годовых</p>
                     </div>
                     <div class="buttons-row">
-                        <a href="/contracts/{{ $contract.Id }}?from=/orders/{{ .Id }}" class="card-button secondary">Подробнее</a>
+                        <a href="/contracts/{{ $contract.Id }}?from=/orders/{{ $orderId }}"
+                           class="card-button secondary">Подробнее</a>
                         <a href="#" class="card-button primary disabled">Удалить</a>
                     </div>
                 </div>
