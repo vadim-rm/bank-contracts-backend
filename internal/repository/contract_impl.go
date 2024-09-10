@@ -10,24 +10,27 @@ import (
 var contracts = []domain.Contract{
 	{
 		Id:          1,
-		ImageId:     1,
-		Name:        "Вклад Это норм",
+		ImageUrl:    "http://localhost:9000/main/1.png",
+		Name:        "Вклад Хороший",
 		AnnualRate:  22,
 		Description: "Очень выгодный вклад",
+		Type:        "debit",
 	},
 	{
 		Id:          2,
-		ImageId:     2,
-		Name:        "Вклад Фиговый",
+		ImageUrl:    "http://localhost:9000/main/2.png",
+		Name:        "Вклад Долгосрочный",
 		AnnualRate:  2,
 		Description: "Невыгодный вклад",
+		Type:        "credit",
 	},
 	{
 		Id:          3,
-		ImageId:     3,
-		Name:        "Вклад Ништяк",
+		ImageUrl:    "http://localhost:9000/main/3.png",
+		Name:        "Вклад Пополняй",
 		AnnualRate:  17,
 		Description: "Немного выгодный вклад",
+		Type:        "credit",
 	},
 }
 
@@ -44,7 +47,7 @@ func (r *ContractImpl) GetList(ctx context.Context, filter dto.ContractsFilter) 
 		if strings.Contains(
 			strings.ToLower(contract.Name),
 			strings.ToLower(filter.Name),
-		) {
+		) && (filter.Type == nil || contract.Type == *filter.Type) {
 			filteredContracts = append(filteredContracts, contract)
 		}
 	}

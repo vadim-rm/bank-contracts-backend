@@ -11,11 +11,35 @@
 <body>
 {{template "header" .Cart}}
 <main>
-    <div class="search-row">
-        <h1>Вклады и счета</h1>
-        <form action="/contracts" method="get" class="search">
-            <input type="text" name="query" placeholder="Поиск" value="{{ .Query }}">
-        </form>
+    <div class="search-column">
+        <div class="search-row">
+            <h1>Договоры</h1>
+            <a class="cart" href="/accounts/{{ .Account.Id }}">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor"
+                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                     class="lucide lucide-shopping-cart"
+                >
+                    <circle cx="8" cy="21" r="1"/>
+                    <circle cx="19" cy="21" r="1"/>
+                    <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/>
+                    <span class="cart-badge">{{ .Account.Count }}</span>
+                </svg>
+            </a>
+        </div>
+        <div class="search-row">
+            <div class="tab-row">
+                <a href="/contracts?contractName={{.ContractNameFilter}}"
+                   class="tab {{ if eq .ContractTypeFilter "" }}tab-active{{ end }}">Все</a>
+                <a href="/contracts?contractName={{.ContractNameFilter}}&contractType=debit"
+                   class="tab {{ if eq .ContractTypeFilter "debit" }}tab-active{{ end }}">Дебетовые</a>
+                <a href="/contracts?contractName={{.ContractNameFilter}}&contractType=credit"
+                   class="tab {{ if eq .ContractTypeFilter "credit" }}tab-active{{ end }}">Кредитные</a>
+            </div>
+            <form action="/contracts" method="get" class="search">
+                <input type="text" name="contractName" placeholder="Поиск" value="{{ .ContractNameFilter }}">
+            </form>
+        </div>
     </div>
     <div class="container">
         {{ if not .Contracts }} По вашему запросу ничего не найдено {{ end }}
@@ -25,24 +49,20 @@
             {{ $odd = not $odd }}
             <div class="card">
                 {{ if $odd }}
-                    <img src="http://localhost:9000/main/{{ $contract.ImageId }}.png" class="image">
+                    <img src="{{ $contract.ImageUrl }}" class="image">
                 {{ end }}
                 <div class="description-column">
-                    <h2 class="title">{{ $contract.Name }}</h2>
+                    <a href="/contracts/{{ $contract.Id }}" class="title">{{ $contract.Name }}</a>
                     <p class="description">{{ $contract.Description }}</p>
                     <div class="badge">
                         <p class="digit">до {{ $contract.AnnualRate }}%</p>
                         <p class="description">ставка годовых</p>
                     </div>
-                    <div class="buttons-row">
-                        <a href="#" class="card-button primary disabled">Оформить</a>
-                        <a href="/contracts/{{ $contract.Id }}?from=/contracts?query={{ $query }}"
-                           class="card-button secondary">Подробнее
-                            ›</a>
-                    </div>
+                    <a href="/contracts/{{ $contract.Id }}"
+                       class="card-button secondary">Подробнее ›</a>
                 </div>
                 {{ if not $odd }}
-                    <img src="http://localhost:9000/main/{{ $contract.ImageId }}.png" class="image">
+                    <img src="{{ $contract.ImageUrl }}" class="image">
                 {{ end }}
             </div>
         {{ end }}

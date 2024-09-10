@@ -11,32 +11,29 @@
 <body>
 {{template "header" .Cart}}
 <main>
-    <a href="/contracts" class="card-button secondary">‹ Назад</a>
     <h1>Заказ</h1>
     <div class="cart-column">
+        <div class="input-column">
+            <label for="account-id">Номер счёта</label>
+            <input type="text" name="contractName" placeholder="Номер счёта" id="account-id"
+                   value="{{ .ContractNameFilter }}">
+        </div>
         {{ $orderId := .Id }}
         {{ range $i, $contract := .Contracts }}
             <div class="card">
-                <img src="http://localhost:9000/main/{{ $contract.ImageId }}.png" class="image image-cart">
+                <img src="{{ $contract.ImageUrl }}" class="image image-cart">
                 <div class="description-column">
-                    <h2>{{ $contract.Name }}</h2>
+                    <a href="/contracts/{{ $contract.Id }}" class="title">{{ $contract.Name }}</a>
                     <div class="badge">
                         <p class="digit">до {{ $contract.AnnualRate }}%</p>
                         <p class="description">ставка годовых</p>
                     </div>
-                    <div class="buttons-row">
-                        <a href="/contracts/{{ $contract.Id }}?from=/orders/{{ $orderId }}"
-                           class="card-button secondary">Подробнее</a>
-                        <a href="#" class="card-button primary disabled">Удалить</a>
-                    </div>
+                    <a href="/contracts/{{ $contract.Id }}"
+                       class="card-button secondary">Подробнее</a>
                 </div>
             </div>
             <hr>
         {{end}}
-        <div class="buttons-row">
-            <a href="#" class="card-button secondary">Очистить</a>
-            <a href="#" class="card-button primary disabled">Оформить заявку</a>
-        </div>
     </div>
 </main>
 </body>

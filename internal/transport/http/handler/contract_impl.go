@@ -11,12 +11,12 @@ import (
 
 type ContractImpl struct {
 	contractService service.Contract
-	orderService    service.Order
+	orderService    service.Account
 }
 
 func NewContractImpl(
 	contractService service.Contract,
-	orderService service.Order,
+	orderService service.Account,
 ) *ContractImpl {
 	return &ContractImpl{
 		contractService: contractService,
@@ -25,7 +25,8 @@ func NewContractImpl(
 }
 
 type getListOfContractsRequest struct {
-	Query string `form:"query"`
+	ContractNameFilter string               `form:"contractName"`
+	ContractTypeFilter *domain.ContractType `form:"contractType,omitempty"`
 }
 
 func (h *ContractImpl) GetList(ctx *gin.Context) {
@@ -41,7 +42,8 @@ func (h *ContractImpl) GetList(ctx *gin.Context) {
 	}
 
 	contracts, err := h.contractService.GetList(ctx, dto.ContractsFilter{
-		Name: request.Query,
+		Name: request.ContractNameFilter,
+		Type: request.ContractTypeFilter,
 	})
 	if err != nil {
 		ctx.AbortWithStatusJSON(
@@ -53,7 +55,7 @@ func (h *ContractImpl) GetList(ctx *gin.Context) {
 		return
 	}
 
-	orderMeta, err := h.orderService.GetCurrentDraft(ctx)
+	account, err := h.orderService.GetCurrentDraft(ctx)
 	if err != nil {
 		ctx.AbortWithStatusJSON(
 			http.StatusInternalServerError,
@@ -62,21 +64,26 @@ func (h *ContractImpl) GetList(ctx *gin.Context) {
 			},
 		)
 		return
+	}
+
+	filter := ""
+	if request.ContractTypeFilter != nil {
+		filter = string(*request.ContractTypeFilter)
 	}
 
 	ctx.HTML(http.StatusOK, "contracts.gohtml", gin.H{
 		"Contracts": contracts,
-		"Cart": gin.H{
-			"Id":    orderMeta.Id,
-			"Count": orderMeta.Count,
+		"Account": gin.H{
+			"Id":    account.Id,
+			"Count": account.Count,
 		},
-		"Query": request.Query,
+		"ContractNameFilter": request.ContractNameFilter,
+		"ContractTypeFilter": filter,
 	})
 }
 
 type getContractByIdRequest struct {
-	Id   int    `uri:"id"`
-	From string `form:"from"`
+	Id int `uri:"id"`
 }
 
 func (h *ContractImpl) GetById(ctx *gin.Context) {
@@ -121,23 +128,5 @@ func (h *ContractImpl) GetById(ctx *gin.Context) {
 		return
 	}
 
-	orderMeta, err := h.orderService.GetCurrentDraft(ctx)
-	if err != nil {
-		ctx.AbortWithStatusJSON(
-			http.StatusInternalServerError,
-			gin.H{
-				"error": err.Error(),
-			},
-		)
-		return
-	}
-
-	ctx.HTML(http.StatusOK, "contract.gohtml", gin.H{
-		"Contract": contract,
-		"Cart": gin.H{
-			"Id":    orderMeta.Id,
-			"Count": orderMeta.Count,
-		},
-		"From": request.From,
-	})
+	ctx.HTML(http.StatusOK, "contract.gohtml", contract)
 }

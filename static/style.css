@@ -17,7 +17,7 @@ main {
 }
 
 .container {
-    margin-top: 16px;
+    margin-top: 52px;
     display: flex;
     flex-direction: column;
     gap: 48px;
@@ -29,6 +29,12 @@ main {
     flex-direction: row;
     justify-content: start;
     gap: 64px;
+}
+
+.tab-row {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
 }
 
 .image {
@@ -59,7 +65,7 @@ h1 {
     margin-bottom: 12px;
 }
 
-.cart-column h2 {
+.cart-column .title {
     font-size: 24px;
     font-weight: 500;
     margin-bottom: 12px;
@@ -91,6 +97,10 @@ h1 {
     font-size: 16px;
     font-weight: 500;
     transition: color .2s linear;
+}
+
+a {
+    text-decoration: none;
 }
 
 .card-button.primary {
@@ -139,8 +149,8 @@ h1 {
     top: 0;
     padding: 20px;
     background: #ffffff;
-    border-bottom: solid 1px;
-    border-color: #e6e6e6;
+    z-index: 10000;
+    box-shadow: 0 1px 0 0 #e6e6e6;
 }
 
 .hero-column {
@@ -168,12 +178,8 @@ h1 {
     margin-bottom: 32px;
 }
 
-.disabled {
-    cursor: not-allowed;
-}
-
 .cart-badge {
-    background: #d32031;
+    background: #428D3A;
     position: relative;
     display: block;
     height: 24px;
@@ -197,7 +203,7 @@ h1 {
     display: flex;
     flex-direction: column;
     gap: 24px;
-    margin-top: 36px;
+    margin-top: 24px;
 }
 
 hr {
@@ -205,14 +211,17 @@ hr {
 }
 
 .search > input {
+    width: 240px;
+}
+
+input {
     border-radius: 12px;
     border: 1px solid #e6e6e6;
     padding: 0 8px;
     height: 32px;
-    width: 240px;
 }
 
-.search > input:focus {
+input:focus {
     outline: #d7d7d7;
     border-color: #d7d7d7;
 }
@@ -222,5 +231,52 @@ hr {
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 36px;
+}
+
+.search-column {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+}
+
+.tab {
+    align-items: center;
+    background: rgba(38, 38, 38, .08);
+    border-radius: 30px;
+    color: #262626;
+    display: flex;
+    font-weight: 500;
+    font-size: 19px;
+    height: 24px;
+    letter-spacing: -.3px;
+    padding: 10px 16px;
+    transition: all .2s ease-in-out;
+    white-space: nowrap;
+    width: fit-content;
+    cursor: pointer;
+}
+
+.tab:not(.tab-active):hover {
+    background: rgba(38, 38, 38, .16);
+}
+
+.tab-active {
+    background: #262626;
+    color: #FFFFFF;
+}
+
+.border-gradient-green {
+    border-top: 5px solid;
+    border-image-slice: 1;
+    border-image-source: linear-gradient(to left, #00C853, #B2FF59);
+}
+
+a.title:hover {
+    color: #0D8523;
+}
+
+.input-column {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }

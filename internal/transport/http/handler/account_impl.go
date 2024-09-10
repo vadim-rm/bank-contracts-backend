@@ -8,22 +8,22 @@ import (
 	"net/http"
 )
 
-type OrderImpl struct {
-	service service.Order
+type AccountImpl struct {
+	service service.Account
 }
 
-func NewOrderImpl(service service.Order) *OrderImpl {
-	return &OrderImpl{
+func NewAccountImpl(service service.Account) *AccountImpl {
+	return &AccountImpl{
 		service: service,
 	}
 }
 
-type getOrderByIdRequest struct {
-	Id int `uri:"id"`
+type getAccountByIdRequest struct {
+	Id string `uri:"id"`
 }
 
-func (h *OrderImpl) GetById(ctx *gin.Context) {
-	var request getOrderByIdRequest
+func (h *AccountImpl) GetById(ctx *gin.Context) {
+	var request getAccountByIdRequest
 	if err := ctx.BindUri(&request); err != nil {
 		ctx.AbortWithStatusJSON(
 			http.StatusBadRequest,
@@ -34,7 +34,7 @@ func (h *OrderImpl) GetById(ctx *gin.Context) {
 		return
 	}
 
-	order, err := h.service.GetById(ctx, domain.OrderId(request.Id))
+	order, err := h.service.GetById(ctx, domain.AccountId(request.Id))
 	if err != nil {
 		if errors.Is(err, domain.ErrNotFound) {
 			ctx.AbortWithStatusJSON(
@@ -54,7 +54,7 @@ func (h *OrderImpl) GetById(ctx *gin.Context) {
 		return
 	}
 
-	ctx.HTML(http.StatusOK, "order.gohtml", gin.H{
+	ctx.HTML(http.StatusOK, "account.gohtml", gin.H{
 		"Id":        order.Id,
 		"Contracts": order.Contracts,
 	})
