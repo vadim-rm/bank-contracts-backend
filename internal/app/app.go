@@ -6,11 +6,14 @@ import (
 	"fmt"
 	"github.com/vadim-rm/bmstu-web-backend/internal/config"
 	"github.com/vadim-rm/bmstu-web-backend/internal/repository"
+	"github.com/vadim-rm/bmstu-web-backend/internal/repository/entity"
 	"github.com/vadim-rm/bmstu-web-backend/internal/service"
 	"github.com/vadim-rm/bmstu-web-backend/internal/transport/http/external_routes"
 	"github.com/vadim-rm/bmstu-web-backend/internal/transport/http/handler"
 	"github.com/vadim-rm/bmstu-web-backend/internal/transport/http/router"
 	"github.com/vadim-rm/bmstu-web-backend/pkg/logger"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 	"log"
 	"net/http"
 	"os"
@@ -23,6 +26,27 @@ func Run() {
 	cfg, err := config.Load()
 	if err != nil {
 		logger.Fatalf("error loading config: %w", err)
+	}
+
+	db, err := gorm.Open(
+		postgres.Open(
+			fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%d",
+				cfg.Postgres.Host, cfg.Postgres.User, cfg.Postgres.Password, cfg.Postgres.DbName, cfg.Postgres.Port)),
+		&gorm.Config{})
+	if err != nil {
+		panic("failed to connect database")
+	}
+
+	err = db.SetupJoinTable(&entity.Account{}, "Contracts", &entity.AccountContracts{})
+	if err != nil {
+		logger.Fatalf("error setting up join table: %s", err.Error())
+		return
+	}
+
+	err = db.AutoMigrate(&entity.Contract{}, &entity.User{}, &entity.Account{})
+	if err != nil {
+		logger.Fatalf("error migrating entities: %s", err.Error())
+		return
 	}
 
 	contractRepository := repository.NewContractImpl()
