@@ -1,6 +1,6 @@
 package domain
 
-type AccountId string
+type AccountId int
 
 type Account struct {
 	Id        AccountId

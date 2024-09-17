@@ -15,7 +15,7 @@ func NewAccountImpl() *AccountImpl {
 
 func (r *AccountImpl) GetById(ctx context.Context, id domain.AccountId) (domain.Account, error) {
 	return domain.Account{
-		Id: "40817810099910004312",
+		Id: id,
 		Contracts: []domain.AccountContract{
 			{
 

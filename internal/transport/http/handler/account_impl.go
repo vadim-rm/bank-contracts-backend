@@ -19,7 +19,7 @@ func NewAccountImpl(service service.Account) *AccountImpl {
 }
 
 type getAccountByIdRequest struct {
-	Id string `uri:"id"`
+	Id int `uri:"id"`
 }
 
 func (h *AccountImpl) GetById(ctx *gin.Context) {
