@@ -31,10 +31,10 @@
             <div class="tab-row">
                 <a href="/contracts?contractName={{.ContractNameFilter}}"
                    class="tab {{ if eq .ContractTypeFilter "" }}tab-active{{ end }}">Все</a>
-                <a href="/contracts?contractName={{.ContractNameFilter}}&contractType=debit"
-                   class="tab {{ if eq .ContractTypeFilter "debit" }}tab-active{{ end }}">Дебетовые</a>
-                <a href="/contracts?contractName={{.ContractNameFilter}}&contractType=credit"
-                   class="tab {{ if eq .ContractTypeFilter "credit" }}tab-active{{ end }}">Кредитные</a>
+                <a href="/contracts?contractName={{.ContractNameFilter}}&contractType=acquiring"
+                   class="tab {{ if eq .ContractTypeFilter "acquiring" }}tab-active{{ end }}">Эквайринг</a>
+                <a href="/contracts?contractName={{.ContractNameFilter}}&contractType=account"
+                   class="tab {{ if eq .ContractTypeFilter "account" }}tab-active{{ end }}">Расчётные счёта</a>
             </div>
             <form action="/contracts" method="get" class="search">
                 <input type="text" name="contractName" placeholder="Поиск" value="{{ .ContractNameFilter }}">
@@ -55,8 +55,8 @@
                     <a href="/contracts/{{ $contract.Id }}" class="title">{{ $contract.Name }}</a>
                     <p class="description">{{ $contract.Description }}</p>
                     <div class="badge">
-                        <p class="digit">до {{ $contract.AnnualRate }}%</p>
-                        <p class="description">ставка годовых</p>
+                        <p class="digit">{{ $contract.Fee }} ₽</p>
+                        <p class="description">плата за обслуживание</p>
                     </div>
                     <a href="/contracts/{{ $contract.Id }}"
                        class="card-button secondary">Подробнее ›</a>

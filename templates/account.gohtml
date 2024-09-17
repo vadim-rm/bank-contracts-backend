@@ -11,22 +11,21 @@
 <body>
 {{template "header" .Cart}}
 <main>
-    <h1>Заказ</h1>
+    <h1>Заявка на счёт</h1>
     <div class="cart-column">
-        <div class="input-column">
-            <label for="account-id">Номер счёта</label>
-            <input type="text" name="contractName" placeholder="Номер счёта" id="account-id"
-                   value="{{ .ContractNameFilter }}">
-        </div>
+        <input type="text" name="contractName" placeholder="Номер счёта" value="{{ .ContractNameFilter }}">
         {{ $orderId := .Id }}
         {{ range $i, $contract := .Contracts }}
             <div class="card">
                 <img src="{{ $contract.ImageUrl }}" class="image image-cart">
                 <div class="description-column">
-                    <a href="/contracts/{{ $contract.Id }}" class="title">{{ $contract.Name }}</a>
+                    <a href="/contracts/{{ $contract.Id }}" class="title">{{ $contract.Name }}
+                        {{ if .IsMain }}
+                            <div class="main-badge">Основной</div>{{ end }}
+                    </a>
                     <div class="badge">
-                        <p class="digit">до {{ $contract.AnnualRate }}%</p>
-                        <p class="description">ставка годовых</p>
+                        <p class="digit">{{ $contract.Fee }} ₽</p>
+                        <p class="description">плата за обслуживание</p>
                     </div>
                     <a href="/contracts/{{ $contract.Id }}"
                        class="card-button secondary">Подробнее</a>

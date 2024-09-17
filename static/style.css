@@ -60,6 +60,10 @@ h1 {
 }
 
 .title {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
     font-size: 36px;
     font-weight: 500;
     margin-bottom: 12px;
@@ -207,7 +211,7 @@ a {
 }
 
 hr {
-    border-top: 1px #e6e6e6;
+    border-top: 1px #eeeeee;
 }
 
 .search > input {
@@ -266,9 +270,9 @@ input:focus {
 }
 
 .border-gradient-green {
-    border-top: 5px solid;
+    border-top: 6px solid;
     border-image-slice: 1;
-    border-image-source: linear-gradient(to left, #00C853, #B2FF59);
+    border-image-source: linear-gradient(to right, #00C853, #B2FF59);
 }
 
 a.title:hover {
@@ -279,4 +283,14 @@ a.title:hover {
     display: flex;
     flex-direction: column;
     gap: 8px;
+}
+
+.main-badge {
+    background: #428D3A;
+    border-radius: 16px;
+    width: min-content;
+    color: white;
+    font-size: 12px;
+    font-weight: normal;
+    padding: 2px 8px;
 }

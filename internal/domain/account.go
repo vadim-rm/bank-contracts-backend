@@ -4,5 +4,5 @@ type AccountId string
 
 type Account struct {
 	Id        AccountId
-	Contracts []Contract
+	Contracts []AccountContract
 }

@@ -7,7 +7,7 @@ type ContractType string
 type Contract struct {
 	Id          ContractId
 	Name        string
-	AnnualRate  uint8
+	Fee         int
 	Description string
 	ImageUrl    string
 	Type        ContractType
