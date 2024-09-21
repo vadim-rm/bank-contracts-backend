@@ -49,7 +49,7 @@ func Run() {
 		return
 	}
 
-	contractRepository := repository.NewContractImpl()
+	contractRepository := repository.NewContractImpl(db)
 	contractService := service.NewContractImpl(contractRepository)
 
 	orderRepository := repository.NewAccountImpl()

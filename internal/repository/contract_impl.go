@@ -2,64 +2,56 @@ package repository
 
 import (
 	"context"
+	"fmt"
 	"github.com/vadim-rm/bmstu-web-backend/internal/domain"
 	"github.com/vadim-rm/bmstu-web-backend/internal/dto"
-	"strings"
+	"github.com/vadim-rm/bmstu-web-backend/internal/repository/entity"
+	"gorm.io/gorm"
 )
 
-var contracts = []domain.Contract{
-	{
-		Id:          1,
-		ImageUrl:    "http://localhost:9000/main/1.png",
-		Name:        "Эквайринг с терминалом для малого бизнеса",
-		Fee:         1000,
-		Description: "Договор для принятия платежей оффлайн",
-		Type:        "acquiring",
-	},
-	{
-		Id:          2,
-		ImageUrl:    "http://localhost:9000/main/2.png",
-		Name:        "Интернет-эквайринг для крупного бизнеса",
-		Fee:         2000,
-		Description: "Договор для принятия платежей на Ваш счёт",
-		Type:        "acquiring",
-	},
-	{
-		Id:          3,
-		ImageUrl:    "http://localhost:9000/main/3.png",
-		Name:        "Расчётный счёт",
-		Fee:         350,
-		Description: "Договор для выполнения расчётов с другими организациями",
-		Type:        "account",
-	},
-}
-
 type ContractImpl struct {
+	db *gorm.DB
 }
 
-func NewContractImpl() *ContractImpl {
-	return &ContractImpl{}
+func NewContractImpl(db *gorm.DB) *ContractImpl {
+	return &ContractImpl{
+		db: db,
+	}
 }
 
 func (r *ContractImpl) GetList(ctx context.Context, filter dto.ContractsFilter) ([]domain.Contract, error) {
-	filteredContracts := make([]domain.Contract, 0)
-	for _, contract := range contracts {
-		if strings.Contains(
-			strings.ToLower(contract.Name),
-			strings.ToLower(filter.Name),
-		) && (filter.Type == nil || contract.Type == *filter.Type) {
-			filteredContracts = append(filteredContracts, contract)
-		}
+	var dbContracts []entity.Contract
+
+	query := r.db.WithContext(ctx).Where(
+		"name ILIKE ?",
+		fmt.Sprintf("%%%s%%", filter.Name),
+	)
+
+	if filter.Type != nil {
+		query = query.Where(map[string]any{
+			"type": *filter.Type,
+		})
 	}
 
-	return filteredContracts, nil
+	if err := query.Find(&dbContracts).Error; err != nil {
+		return nil, err
+	}
+
+	contracts := make([]domain.Contract, 0)
+	for _, contract := range dbContracts {
+		contracts = append(contracts, contract.ToDomain())
+	}
+
+	return contracts, nil
 }
 
 func (r *ContractImpl) GetById(ctx context.Context, id domain.ContractId) (domain.Contract, error) {
-	for _, contract := range contracts {
-		if contract.Id == id {
-			return contract, nil
-		}
+	var contract entity.Contract
+
+	err := r.db.WithContext(ctx).Where(entity.Contract{ID: uint(id)}).First(&contract).Error
+	if err != nil {
+		return domain.Contract{}, err
 	}
-	return domain.Contract{}, domain.ErrNotFound
+
+	return contract.ToDomain(), nil
 }

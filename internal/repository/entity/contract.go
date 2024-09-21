@@ -1,8 +1,10 @@
 package entity
 
+import "github.com/vadim-rm/bmstu-web-backend/internal/domain"
+
 type Contract struct {
 	ID          uint
-	Name        string `gorm:"size:30;not null;unique"`
+	Name        string `gorm:"size:60;not null;unique"`
 	Fee         *int32
 	Description *string `gorm:"size:80"`
 	ImageUrl    *string `gorm:"size:80"`
@@ -10,4 +12,15 @@ type Contract struct {
 
 	Deleted  bool      `gorm:"not null"`
 	Accounts []Account `gorm:"many2many:account_contracts"`
+}
+
+func (c Contract) ToDomain() domain.Contract {
+	return domain.Contract{
+		Id:          domain.ContractId(c.ID),
+		Name:        c.Name,
+		Fee:         c.Fee,
+		Description: c.Description,
+		ImageUrl:    c.ImageUrl,
+		Type:        (*domain.ContractType)(c.Type),
+	}
 }

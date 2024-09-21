@@ -7,8 +7,8 @@ type ContractType string
 type Contract struct {
 	Id          ContractId
 	Name        string
-	Fee         int
-	Description string
-	ImageUrl    string
-	Type        ContractType
+	Fee         *int32
+	Description *string
+	ImageUrl    *string
+	Type        *ContractType
 }
