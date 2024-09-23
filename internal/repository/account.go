@@ -11,6 +11,7 @@ type Account interface {
 	Create(ctx context.Context, input CreateAccountInput) (domain.AccountId, error)
 	GetById(ctx context.Context, id domain.AccountId) (domain.Account, error)
 	GetCurrentDraft(ctx context.Context, userId domain.UserId) (dto.Account, error)
+	Delete(ctx context.Context, id domain.AccountId) error
 }
 
 type CreateAccountInput struct {

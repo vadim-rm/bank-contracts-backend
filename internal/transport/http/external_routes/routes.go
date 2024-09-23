@@ -11,4 +11,5 @@ func Initialize(parent *gin.Engine, contractHandler handler.Contract, accountHan
 	parent.POST("/contracts/:id/add-to-account", contractHandler.AddToAccount)
 
 	parent.GET("/accounts/:id", accountHandler.GetById)
+	parent.POST("/accounts/:id", accountHandler.Delete)
 }

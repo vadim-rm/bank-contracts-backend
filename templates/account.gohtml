@@ -14,7 +14,6 @@
     <h1>Заявка на счёт</h1>
     <div class="cart-column">
         <input type="text" name="contractName" placeholder="Номер счёта" value="{{ .ContractNameFilter }}">
-        {{ $orderId := .Id }}
         {{ range $i, $contract := .Contracts }}
             <div class="card">
                 <img src="{{ $contract.ImageUrl }}" class="image image-cart">
@@ -33,6 +32,11 @@
             </div>
             <hr>
         {{end}}
+        <div class="buttons-row">
+            <form action="/accounts/{{ .Id }}" method="post">
+                <button class="card-button secondary" type="submit">Очистить</button>
+            </form>
+        </div>
     </div>
 </main>
 </body>

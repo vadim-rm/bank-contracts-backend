@@ -59,3 +59,33 @@ func (h *AccountImpl) GetById(ctx *gin.Context) {
 		"Contracts": order.Contracts,
 	})
 }
+
+type deleteRequest struct {
+	Id int `uri:"id"`
+}
+
+func (h *AccountImpl) Delete(ctx *gin.Context) {
+	var request deleteRequest
+	if err := ctx.BindUri(&request); err != nil {
+		ctx.AbortWithStatusJSON(
+			http.StatusBadRequest,
+			gin.H{
+				"error": err.Error(),
+			},
+		)
+		return
+	}
+
+	err := h.service.Delete(ctx, domain.AccountId(request.Id))
+	if err != nil {
+		ctx.AbortWithStatusJSON(
+			http.StatusInternalServerError,
+			gin.H{
+				"error": err.Error(),
+			},
+		)
+		return
+	}
+
+	ctx.Redirect(http.StatusSeeOther, "/contracts")
+}

@@ -36,7 +36,12 @@ func (r *AccountImpl) Create(ctx context.Context, input CreateAccountInput) (dom
 func (r *AccountImpl) GetById(ctx context.Context, id domain.AccountId) (domain.Account, error) {
 	var account entity.Account
 
-	err := r.db.WithContext(ctx).Preload("Contracts").Where(entity.Account{ID: uint(id)}).First(&account).Error
+	err := r.db.WithContext(ctx).Preload("Contracts").
+		Where(entity.Account{
+			ID: uint(id),
+		}).
+		Where("deleted = ?", false).
+		First(&account).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return domain.Account{}, domain.ErrNotFound
@@ -49,7 +54,12 @@ func (r *AccountImpl) GetById(ctx context.Context, id domain.AccountId) (domain.
 func (r *AccountImpl) GetCurrentDraft(ctx context.Context, userId domain.UserId) (dto.Account, error) {
 	var account entity.Account
 
-	err := r.db.WithContext(ctx).Where(entity.Account{Creator: uint(userId)}).First(&account).Error
+	err := r.db.WithContext(ctx).
+		Where(entity.Account{
+			Creator: uint(userId),
+		}).
+		Where("deleted = ?", false).
+		First(&account).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return dto.Account{}, domain.ErrNotFound
@@ -71,4 +81,8 @@ func (r *AccountImpl) GetCurrentDraft(ctx context.Context, userId domain.UserId)
 		Id:    domain.AccountId(account.ID),
 		Count: int(count),
 	}, nil
+}
+
+func (r *AccountImpl) Delete(ctx context.Context, id domain.AccountId) error {
+	return r.db.WithContext(ctx).Exec("UPDATE accounts SET deleted = true WHERE id = ?", id).Error
 }

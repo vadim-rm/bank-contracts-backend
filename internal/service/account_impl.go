@@ -24,3 +24,7 @@ func (s *AccountImpl) GetById(ctx context.Context, id domain.AccountId) (domain.
 func (s *AccountImpl) GetCurrentDraft(ctx context.Context, userId domain.UserId) (dto.Account, error) {
 	return s.repository.GetCurrentDraft(ctx, userId)
 }
+
+func (s *AccountImpl) Delete(ctx context.Context, id domain.AccountId) error {
+	return s.repository.Delete(ctx, id)
+}
