@@ -108,7 +108,7 @@ a {
 }
 
 .card-button.primary {
-    background: #d32031;
+    background: #428D3A;
     color: white;
     padding: 16px 32px;
     border-radius: 12px;
@@ -293,4 +293,14 @@ a.title:hover {
     font-size: 12px;
     font-weight: normal;
     padding: 2px 8px;
+}
+
+button, input[type="submit"], input[type="reset"] {
+    background: none;
+    color: inherit;
+    border: none;
+    padding: 0;
+    font: inherit;
+    cursor: pointer;
+    outline: inherit;
 }

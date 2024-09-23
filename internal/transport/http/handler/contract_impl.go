@@ -11,7 +11,7 @@ import (
 
 type ContractImpl struct {
 	contractService service.Contract
-	orderService    service.Account
+	accountService  service.Account
 }
 
 func NewContractImpl(
@@ -20,7 +20,7 @@ func NewContractImpl(
 ) *ContractImpl {
 	return &ContractImpl{
 		contractService: contractService,
-		orderService:    orderService,
+		accountService:  orderService,
 	}
 }
 
@@ -55,8 +55,8 @@ func (h *ContractImpl) GetList(ctx *gin.Context) {
 		return
 	}
 
-	account, err := h.orderService.GetCurrentDraft(ctx)
-	if err != nil {
+	account, err := h.accountService.GetCurrentDraft(ctx, 0)
+	if err != nil && !errors.Is(err, domain.ErrNotFound) {
 		ctx.AbortWithStatusJSON(
 			http.StatusInternalServerError,
 			gin.H{
@@ -129,4 +129,43 @@ func (h *ContractImpl) GetById(ctx *gin.Context) {
 	}
 
 	ctx.HTML(http.StatusOK, "contract.gohtml", contract)
+}
+
+type addToAccountRequest struct {
+	Id int `uri:"id"`
+}
+
+func (h *ContractImpl) AddToAccount(ctx *gin.Context) {
+	var request addToAccountRequest
+	if err := ctx.BindUri(&request); err != nil {
+		ctx.AbortWithStatusJSON(
+			http.StatusBadRequest,
+			gin.H{
+				"error": err.Error(),
+			},
+		)
+		return
+	}
+
+	err := h.contractService.AddToCurrentDraft(ctx, domain.ContractId(request.Id))
+	if err != nil {
+		if errors.Is(err, domain.ErrNotFound) {
+			ctx.AbortWithStatusJSON(
+				http.StatusNotFound,
+				gin.H{
+					"error": err.Error(),
+				},
+			)
+			return
+		}
+		ctx.AbortWithStatusJSON(
+			http.StatusInternalServerError,
+			gin.H{
+				"error": err.Error(),
+			},
+		)
+		return
+	}
+
+	ctx.Redirect(http.StatusSeeOther, "/contracts")
 }

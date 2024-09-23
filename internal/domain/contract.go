@@ -11,4 +11,6 @@ type Contract struct {
 	Description *string
 	ImageUrl    *string
 	Type        *ContractType
+
+	IsMain bool // todo. move to dto
 }

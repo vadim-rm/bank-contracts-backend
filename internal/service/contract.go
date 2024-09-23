@@ -9,4 +9,5 @@ import (
 type Contract interface {
 	GetList(ctx context.Context, filter dto.ContractsFilter) ([]domain.Contract, error)
 	GetById(ctx context.Context, id domain.ContractId) (domain.Contract, error)
+	AddToCurrentDraft(ctx context.Context, id domain.ContractId) error
 }

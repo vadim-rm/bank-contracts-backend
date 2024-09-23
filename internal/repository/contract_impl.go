@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/vadim-rm/bmstu-web-backend/internal/domain"
 	"github.com/vadim-rm/bmstu-web-backend/internal/dto"
@@ -50,8 +51,19 @@ func (r *ContractImpl) GetById(ctx context.Context, id domain.ContractId) (domai
 
 	err := r.db.WithContext(ctx).Where(entity.Contract{ID: uint(id)}).First(&contract).Error
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return domain.Contract{}, domain.ErrNotFound
+		}
 		return domain.Contract{}, err
 	}
 
 	return contract.ToDomain(), nil
+}
+
+func (r *ContractImpl) AddToAccount(ctx context.Context, input AddToAccountInput) error {
+	return r.db.WithContext(ctx).Create(entity.AccountContracts{
+		AccountID:  uint(input.AccountId),
+		ContractID: uint(input.ContractId),
+		IsMain:     input.IsMain,
+	}).Error
 }

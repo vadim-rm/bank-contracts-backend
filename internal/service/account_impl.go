@@ -21,6 +21,6 @@ func (s *AccountImpl) GetById(ctx context.Context, id domain.AccountId) (domain.
 	return s.repository.GetById(ctx, id)
 }
 
-func (s *AccountImpl) GetCurrentDraft(ctx context.Context) (dto.Account, error) {
-	return s.repository.GetCurrentDraft(ctx)
+func (s *AccountImpl) GetCurrentDraft(ctx context.Context, userId domain.UserId) (dto.Account, error) {
+	return s.repository.GetCurrentDraft(ctx, userId)
 }

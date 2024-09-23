@@ -2,46 +2,73 @@ package repository
 
 import (
 	"context"
+	"errors"
 	"github.com/vadim-rm/bmstu-web-backend/internal/domain"
 	"github.com/vadim-rm/bmstu-web-backend/internal/dto"
+	"github.com/vadim-rm/bmstu-web-backend/internal/repository/entity"
+	"gorm.io/gorm"
 )
 
 type AccountImpl struct {
+	db *gorm.DB
 }
 
-func NewAccountImpl() *AccountImpl {
-	return &AccountImpl{}
+func NewAccountImpl(db *gorm.DB) *AccountImpl {
+	return &AccountImpl{
+		db: db,
+	}
+}
+
+func (r *AccountImpl) Create(ctx context.Context, input CreateAccountInput) (domain.AccountId, error) {
+	account := entity.Account{
+		CreatedAt: input.CreatedAt,
+		Status:    string(input.Status),
+		Creator:   uint(input.Creator),
+	}
+	err := r.db.WithContext(ctx).Select("CreatedAt", "Status", "Creator").Create(&account).Error
+	if err != nil {
+		return 0, err
+	}
+
+	return domain.AccountId(account.ID), nil
 }
 
 func (r *AccountImpl) GetById(ctx context.Context, id domain.AccountId) (domain.Account, error) {
-	return domain.Account{
-		Id: id,
-		Contracts: []domain.AccountContract{
-			{
+	var account entity.Account
 
-				Id:       2,
-				ImageUrl: "http://localhost:9000/main/2.png",
-				Name:     "Интернет-эквайринг для крупного бизнеса",
-				Fee:      2000,
-				Type:     "acquiring",
+	err := r.db.WithContext(ctx).Preload("Contracts").Where(entity.Account{ID: uint(id)}).First(&account).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return domain.Account{}, domain.ErrNotFound
+		}
+	}
 
-				IsMain: true,
-			},
-			{
-
-				Id:       3,
-				ImageUrl: "http://localhost:9000/main/3.png",
-				Name:     "Расчётный счёт",
-				Fee:      350,
-				Type:     "account",
-			},
-		},
-	}, nil
+	return account.ToDomain(), nil
 }
 
-func (r *AccountImpl) GetCurrentDraft(ctx context.Context) (dto.Account, error) {
+func (r *AccountImpl) GetCurrentDraft(ctx context.Context, userId domain.UserId) (dto.Account, error) {
+	var account entity.Account
+
+	err := r.db.WithContext(ctx).Where(entity.Account{Creator: uint(userId)}).First(&account).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return dto.Account{}, domain.ErrNotFound
+		}
+		return dto.Account{}, err
+	}
+
+	var count int64
+	err = r.db.WithContext(ctx).Table("account_contracts").
+		Where(entity.AccountContracts{AccountID: account.ID}).Count(&count).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return dto.Account{}, domain.ErrNotFound
+		}
+		return dto.Account{}, err
+	}
+
 	return dto.Account{
-		Id:    1,
-		Count: 2,
+		Id:    domain.AccountId(account.ID),
+		Count: int(count),
 	}, nil
 }

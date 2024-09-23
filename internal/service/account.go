@@ -8,5 +8,5 @@ import (
 
 type Account interface {
 	GetById(ctx context.Context, id domain.AccountId) (domain.Account, error)
-	GetCurrentDraft(ctx context.Context) (dto.Account, error)
+	GetCurrentDraft(ctx context.Context, userId domain.UserId) (dto.Account, error)
 }
