@@ -16,6 +16,4 @@ type Account struct {
 	Moderator *uint
 
 	Contracts []Contract `gorm:"many2many:account_contracts"`
-
-	Deleted bool `gorm:"not null"`
 }

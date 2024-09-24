@@ -7,7 +7,8 @@ type AccountId int
 type AccountStatus string
 
 const (
-	AccountStatusDraft AccountStatus = "draft" // todo add other statuses
+	AccountStatusDraft   AccountStatus = "draft"
+	AccountStatusDeleted AccountStatus = "deleted"
 )
 
 type AccountNumber string

@@ -61,7 +61,8 @@ func (r *AccountImpl) GetById(ctx context.Context, id domain.AccountId) (domain.
 	err = r.db.WithContext(ctx).Table("contracts").
 		Select("contracts.id as contract_id, contracts.name, contracts.fee, contracts.description, contracts.image_url, contracts.type, account_contracts.is_main").
 		Joins("JOIN account_contracts ON account_contracts.contract_id = contracts.id").
-		Where("account_contracts.account_id = ?", id).
+		Joins("JOIN accounts ON account_contracts.account_id = accounts.id").
+		Where("account_contracts.account_id = ? AND accounts.status <> ?", id, domain.AccountStatusDeleted).
 		Order("account_contracts.is_main DESC").
 		Scan(&contracts).Error
 	if err != nil {
@@ -104,7 +105,7 @@ func (r *AccountImpl) GetCurrentDraft(ctx context.Context, userId domain.UserId)
 		Where(entity.Account{
 			Creator: uint(userId),
 		}).
-		Where("deleted = ?", false).
+		Where("status <> ?", domain.AccountStatusDeleted).
 		First(&account).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -130,5 +131,5 @@ func (r *AccountImpl) GetCurrentDraft(ctx context.Context, userId domain.UserId)
 }
 
 func (r *AccountImpl) Delete(ctx context.Context, id domain.AccountId) error {
-	return r.db.WithContext(ctx).Exec("UPDATE accounts SET deleted = true WHERE id = ?", id).Error
+	return r.db.WithContext(ctx).Exec("UPDATE accounts SET status = ? WHERE id = ?", domain.AccountStatusDeleted, id).Error
 }
