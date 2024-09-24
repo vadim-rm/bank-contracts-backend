@@ -7,7 +7,6 @@ import (
 	"github.com/vadim-rm/bmstu-web-backend/internal/dto"
 	"github.com/vadim-rm/bmstu-web-backend/internal/repository/entity"
 	"gorm.io/gorm"
-	"time"
 )
 
 type AccountImpl struct {
@@ -32,19 +31,6 @@ func (r *AccountImpl) Create(ctx context.Context, input CreateAccountInput) (dom
 	}
 
 	return domain.AccountId(account.ID), nil
-}
-
-type accountWithContracts struct {
-	ID          uint
-	CreatedAt   time.Time
-	RequestedAt *time.Time
-	FinishedAt  *time.Time
-	Status      string
-	Number      *string
-	Creator     uint
-	Moderator   *uint
-	Deleted     bool
-	Contracts   []contractWithIsMain
 }
 
 type contractWithIsMain struct {
