@@ -24,5 +24,5 @@ type Account struct {
 	Creator   UserId
 	Moderator *UserId
 
-	Contracts []Contract
+	Contracts []AccountContract
 }

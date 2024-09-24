@@ -1,7 +1,8 @@
 package entity
 
 type AccountContracts struct {
-	AccountID  uint `gorm:"primaryKey"`
-	ContractID uint `gorm:"primaryKey"`
-	IsMain     bool `gorm:"not null"` // todo. add fields according to requirements
+	ID         uint
+	AccountID  uint `gorm:"index:idx_composite_key,unique"`
+	ContractID uint `gorm:"index:idx_composite_key,unique"`
+	IsMain     bool `gorm:"not null"`
 }

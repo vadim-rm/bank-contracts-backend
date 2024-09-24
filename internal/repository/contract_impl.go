@@ -61,9 +61,11 @@ func (r *ContractImpl) GetById(ctx context.Context, id domain.ContractId) (domai
 }
 
 func (r *ContractImpl) AddToAccount(ctx context.Context, input AddToAccountInput) error {
-	return r.db.WithContext(ctx).Create(entity.AccountContracts{
+	accountContract := entity.AccountContracts{
 		AccountID:  uint(input.AccountId),
 		ContractID: uint(input.ContractId),
 		IsMain:     input.IsMain,
-	}).Error
+	}
+
+	return r.db.WithContext(ctx).Create(&accountContract).Error
 }

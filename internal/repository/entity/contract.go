@@ -24,3 +24,14 @@ func (c Contract) ToDomain() domain.Contract {
 		Type:        (*domain.ContractType)(c.Type),
 	}
 }
+
+func (c Contract) ToAccountDomain() domain.AccountContract {
+	return domain.AccountContract{
+		Id:          domain.ContractId(c.ID),
+		Name:        c.Name,
+		Fee:         c.Fee,
+		Description: c.Description,
+		ImageUrl:    c.ImageUrl,
+		Type:        (*domain.ContractType)(c.Type),
+	}
+}

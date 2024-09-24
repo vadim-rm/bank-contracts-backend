@@ -11,6 +11,15 @@ type Contract struct {
 	Description *string
 	ImageUrl    *string
 	Type        *ContractType
+}
 
-	IsMain bool // todo. move to dto
+type AccountContract struct {
+	Id          ContractId
+	Name        string
+	Fee         *int32
+	Description *string
+	ImageUrl    *string
+	Type        *ContractType
+
+	IsMain bool
 }

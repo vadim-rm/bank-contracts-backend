@@ -1,7 +1,6 @@
 package entity
 
 import (
-	"github.com/vadim-rm/bmstu-web-backend/internal/domain"
 	"time"
 )
 
@@ -19,26 +18,4 @@ type Account struct {
 	Contracts []Contract `gorm:"many2many:account_contracts"`
 
 	Deleted bool `gorm:"not null"`
-}
-
-func (a Account) ToDomain() domain.Account {
-	contracts := make([]domain.Contract, 0, len(a.Contracts))
-	for _, contract := range a.Contracts {
-		contracts = append(contracts, contract.ToDomain())
-	}
-
-	return domain.Account{
-		Id: domain.AccountId(a.ID),
-
-		CreatedAt:   a.CreatedAt,
-		RequestedAt: a.RequestedAt,
-		FinishedAt:  a.FinishedAt,
-		Status:      domain.AccountStatus(a.Status),
-		Number:      (*domain.AccountNumber)(a.Number),
-
-		Creator:   domain.UserId(a.Creator),
-		Moderator: (*domain.UserId)(a.Moderator),
-
-		Contracts: contracts,
-	}
 }

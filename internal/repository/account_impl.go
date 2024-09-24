@@ -7,6 +7,7 @@ import (
 	"github.com/vadim-rm/bmstu-web-backend/internal/dto"
 	"github.com/vadim-rm/bmstu-web-backend/internal/repository/entity"
 	"gorm.io/gorm"
+	"time"
 )
 
 type AccountImpl struct {
@@ -33,22 +34,81 @@ func (r *AccountImpl) Create(ctx context.Context, input CreateAccountInput) (dom
 	return domain.AccountId(account.ID), nil
 }
 
+type accountWithContracts struct {
+	ID          uint
+	CreatedAt   time.Time
+	RequestedAt *time.Time
+	FinishedAt  *time.Time
+	Status      string
+	Number      *string
+	Creator     uint
+	Moderator   *uint
+	Deleted     bool
+	Contracts   []contractWithIsMain
+}
+
+type contractWithIsMain struct {
+	ID          uint
+	Name        string
+	Fee         *int32
+	Description *string
+	ImageUrl    *string
+	Type        *string
+
+	Deleted bool
+	IsMain  bool
+}
+
 func (r *AccountImpl) GetById(ctx context.Context, id domain.AccountId) (domain.Account, error) {
 	var account entity.Account
 
-	err := r.db.WithContext(ctx).Preload("Contracts").
-		Where(entity.Account{
-			ID: uint(id),
-		}).
+	err := r.db.WithContext(ctx).Where(entity.Account{ID: uint(id)}).
 		Where("deleted = ?", false).
 		First(&account).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return domain.Account{}, domain.ErrNotFound
 		}
+		return domain.Account{}, err
+	}
+	var contracts []contractWithIsMain
+	err = r.db.WithContext(ctx).Table("contracts").
+		Select("contracts.id as contract_id, contracts.name, contracts.fee, contracts.description, contracts.image_url, contracts.type, account_contracts.is_main").
+		Joins("JOIN account_contracts ON account_contracts.contract_id = contracts.id").
+		Where("account_contracts.account_id = ?", id).
+		Order("account_contracts.is_main DESC").
+		Scan(&contracts).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return domain.Account{}, domain.ErrNotFound
+		}
+		return domain.Account{}, err
 	}
 
-	return account.ToDomain(), nil
+	var accountContracts []domain.AccountContract
+	for _, c := range contracts {
+		accountContract := domain.AccountContract{
+			Id:          domain.ContractId(c.ID),
+			Name:        c.Name,
+			Fee:         c.Fee,
+			Description: c.Description,
+			ImageUrl:    c.ImageUrl,
+			Type:        (*domain.ContractType)(c.Type),
+			IsMain:      c.IsMain,
+		}
+		accountContracts = append(accountContracts, accountContract)
+	}
+
+	return domain.Account{
+		Id:          domain.AccountId(account.ID),
+		CreatedAt:   account.CreatedAt,
+		RequestedAt: account.RequestedAt,
+		FinishedAt:  account.FinishedAt,
+		Status:      domain.AccountStatus(account.Status),
+		Creator:     domain.UserId(account.Creator),
+		Moderator:   (*domain.UserId)(account.Moderator),
+		Contracts:   accountContracts,
+	}, nil
 }
 
 func (r *AccountImpl) GetCurrentDraft(ctx context.Context, userId domain.UserId) (dto.Account, error) {
