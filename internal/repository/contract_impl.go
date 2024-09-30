@@ -60,7 +60,7 @@ func (r *ContractImpl) Get(ctx context.Context, id domain.ContractId) (domain.Co
 	return contract.ToDomain(), nil
 }
 
-func (r *ContractImpl) Add(ctx context.Context, input AddContractInput) (domain.ContractId, error) {
+func (r *ContractImpl) Add(ctx context.Context, input CreateContractInput) (domain.ContractId, error) {
 	contract := entity.Contract{
 		Name:        input.Name,
 		Fee:         input.Fee,

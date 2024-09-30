@@ -33,8 +33,8 @@ func (s *ContractImpl) Get(ctx context.Context, id domain.ContractId) (domain.Co
 	return s.contractRepository.Get(ctx, id)
 }
 
-func (s *ContractImpl) Create(ctx context.Context, input AddContractInput) (domain.ContractId, error) {
-	return s.contractRepository.Create(ctx, repository.AddContractInput{
+func (s *ContractImpl) Create(ctx context.Context, input CreateContractInput) (domain.ContractId, error) {
+	return s.contractRepository.Create(ctx, repository.CreateContractInput{
 		Name:        input.Name,
 		Fee:         input.Fee,
 		Description: input.Description,

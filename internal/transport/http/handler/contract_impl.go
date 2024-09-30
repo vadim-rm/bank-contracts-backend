@@ -105,11 +105,6 @@ func (h *ContractImpl) Get(ctx *gin.Context) {
 		return
 	}
 
-	if err := ctx.BindQuery(&request); err != nil {
-		newErrorResponse(ctx, err)
-		return
-	}
-
 	contract, err := h.contractService.Get(ctx, domain.ContractId(request.Id))
 	if err != nil {
 		newErrorResponse(ctx, err)
@@ -126,6 +121,95 @@ func (h *ContractImpl) Get(ctx *gin.Context) {
 	})
 }
 
+type createRequest struct {
+	Name        string  `json:"name"`
+	Fee         int32   `json:"fee"`
+	Description *string `json:"description,omitempty"`
+	Type        string  `json:"type"`
+}
+
+type createResponse struct {
+	Id int `json:"id"`
+}
+
+func (h *ContractImpl) Create(ctx *gin.Context) {
+	var request createRequest
+	if err := ctx.BindJSON(&request); err != nil {
+		newErrorResponse(ctx, err)
+		return
+	}
+
+	id, err := h.contractService.Create(ctx, service.CreateContractInput{
+		Name:        request.Name,
+		Fee:         request.Fee,
+		Description: request.Description,
+		Type:        domain.ContractType(request.Type),
+	})
+	if err != nil {
+		newErrorResponse(ctx, err)
+		return
+	}
+
+	ctx.JSON(http.StatusCreated, createResponse{
+		Id: int(id),
+	})
+}
+
+type updateRequest struct {
+	Id int `uri:"id"`
+
+	Name        *string              `json:"name,omitempty"`
+	Fee         *int32               `json:"fee,omitempty"`
+	Description *string              `json:"description,omitempty"`
+	Type        *domain.ContractType `json:"type,omitempty"`
+}
+
+func (h *ContractImpl) Update(ctx *gin.Context) {
+	var request updateRequest
+	if err := ctx.BindUri(&request); err != nil {
+		newErrorResponse(ctx, err)
+		return
+	}
+
+	if err := ctx.BindJSON(&request); err != nil {
+		newErrorResponse(ctx, err)
+		return
+	}
+
+	err := h.contractService.Update(ctx, domain.ContractId(request.Id), service.UpdateContractInput{
+		Name:        request.Name,
+		Fee:         request.Fee,
+		Description: request.Description,
+		Type:        request.Type,
+	})
+	if err != nil {
+		newErrorResponse(ctx, err)
+		return
+	}
+
+	ctx.Status(http.StatusOK)
+}
+
+type deleteContractRequest struct {
+	Id int `uri:"id"`
+}
+
+func (h *ContractImpl) Delete(ctx *gin.Context) {
+	var request deleteContractRequest
+	if err := ctx.BindUri(&request); err != nil {
+		newErrorResponse(ctx, err)
+		return
+	}
+
+	err := h.contractService.Delete(ctx, domain.ContractId(request.Id))
+	if err != nil {
+		newErrorResponse(ctx, err)
+		return
+	}
+
+	ctx.Status(http.StatusOK)
+}
+
 type addToAccountRequest struct {
 	Id int `uri:"id"`
 }
@@ -133,34 +217,15 @@ type addToAccountRequest struct {
 func (h *ContractImpl) AddToAccount(ctx *gin.Context) {
 	var request addToAccountRequest
 	if err := ctx.BindUri(&request); err != nil {
-		ctx.AbortWithStatusJSON(
-			http.StatusBadRequest,
-			gin.H{
-				"error": err.Error(),
-			},
-		)
+		newErrorResponse(ctx, err)
 		return
 	}
 
 	err := h.contractService.AddToCurrentDraft(ctx, domain.ContractId(request.Id))
 	if err != nil {
-		if errors.Is(err, domain.ErrNotFound) {
-			ctx.AbortWithStatusJSON(
-				http.StatusNotFound,
-				gin.H{
-					"error": err.Error(),
-				},
-			)
-			return
-		}
-		ctx.AbortWithStatusJSON(
-			http.StatusInternalServerError,
-			gin.H{
-				"error": err.Error(),
-			},
-		)
+		newErrorResponse(ctx, err)
 		return
 	}
 
-	ctx.Redirect(http.StatusSeeOther, "/contracts")
+	ctx.Status(http.StatusOK)
 }
