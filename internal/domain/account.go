@@ -7,8 +7,11 @@ type AccountId int
 type AccountStatus string
 
 const (
-	AccountStatusDraft   AccountStatus = "draft"
-	AccountStatusDeleted AccountStatus = "deleted"
+	AccountStatusDraft     AccountStatus = "draft"
+	AccountStatusDeleted   AccountStatus = "deleted"
+	AccountStatusApplied   AccountStatus = "applied"
+	AccountStatusFinalized AccountStatus = "finalized"
+	AccountStatusRejected  AccountStatus = "rejected"
 )
 
 type AccountNumber string

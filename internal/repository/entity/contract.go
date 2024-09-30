@@ -5,12 +5,11 @@ import "github.com/vadim-rm/bmstu-web-backend/internal/domain"
 type Contract struct {
 	ID          uint
 	Name        string  `gorm:"size:60;not null;unique"`
-	Fee         *int32  `gorm:"not null"`
+	Fee         int32   `gorm:"not null"`
 	Description *string `gorm:"size:80"`
 	ImageUrl    *string `gorm:"size:80"`
-	Type        *string `gorm:"size:20;not null"`
+	Type        string  `gorm:"size:20;not null"`
 
-	Deleted  bool      `gorm:"not null"`
 	Accounts []Account `gorm:"many2many:account_contracts"`
 }
 
@@ -21,7 +20,7 @@ func (c Contract) ToDomain() domain.Contract {
 		Fee:         c.Fee,
 		Description: c.Description,
 		ImageUrl:    c.ImageUrl,
-		Type:        (*domain.ContractType)(c.Type),
+		Type:        domain.ContractType(c.Type),
 	}
 }
 
@@ -32,6 +31,6 @@ func (c Contract) ToAccountDomain() domain.AccountContract {
 		Fee:         c.Fee,
 		Description: c.Description,
 		ImageUrl:    c.ImageUrl,
-		Type:        (*domain.ContractType)(c.Type),
+		Type:        domain.ContractType(c.Type),
 	}
 }

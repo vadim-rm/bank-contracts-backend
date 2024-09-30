@@ -9,8 +9,7 @@ type Config struct {
 }
 
 type app struct {
-	Debug         bool   `env:"DEBUG"`
-	TemplatesPath string `env:"TEMPLATES_PATH"`
+	Debug bool `env:"DEBUG"`
 }
 
 type http struct {

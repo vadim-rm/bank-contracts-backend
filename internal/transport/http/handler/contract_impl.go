@@ -3,6 +3,7 @@ package handler
 import (
 	"errors"
 	"github.com/gin-gonic/gin"
+	"github.com/vadim-rm/bmstu-web-backend/internal/auth"
 	"github.com/vadim-rm/bmstu-web-backend/internal/domain"
 	"github.com/vadim-rm/bmstu-web-backend/internal/dto"
 	"github.com/vadim-rm/bmstu-web-backend/internal/service"
@@ -29,15 +30,29 @@ type getListOfContractsRequest struct {
 	ContractTypeFilter *domain.ContractType `form:"contractType,omitempty"`
 }
 
+type getListOfContractsResponse struct {
+	Contracts []contractResponse `json:"contracts"`
+	Account   *accountResponse   `json:"account,omitempty"`
+}
+
+type contractResponse struct {
+	Id          int     `json:"id"`
+	Name        string  `json:"name"`
+	Fee         int32   `json:"fee"`
+	Description *string `json:"description,omitempty"`
+	ImageUrl    *string `json:"imageUrl,omitempty"`
+	Type        string  `json:"type"`
+}
+
+type accountResponse struct {
+	Id    int `json:"id"`
+	Count int `json:"count"`
+}
+
 func (h *ContractImpl) GetList(ctx *gin.Context) {
 	var request getListOfContractsRequest
 	if err := ctx.BindQuery(&request); err != nil {
-		ctx.AbortWithStatusJSON(
-			http.StatusBadRequest,
-			gin.H{
-				"error": err.Error(),
-			},
-		)
+		newErrorResponse(ctx, err)
 		return
 	}
 
@@ -46,89 +61,69 @@ func (h *ContractImpl) GetList(ctx *gin.Context) {
 		Type: request.ContractTypeFilter,
 	})
 	if err != nil {
-		ctx.AbortWithStatusJSON(
-			http.StatusInternalServerError,
-			gin.H{
-				"error": err.Error(),
-			},
-		)
+		newErrorResponse(ctx, err)
 		return
 	}
+	contractsResponse := make([]contractResponse, 0, len(contracts))
+	for _, contract := range contracts {
+		contractsResponse = append(contractsResponse, contractResponse{
+			Id:          int(contract.Id),
+			Name:        contract.Name,
+			Fee:         contract.Fee,
+			Description: contract.Description,
+			ImageUrl:    contract.ImageUrl,
+			Type:        string(contract.Type),
+		})
+	}
 
-	account, err := h.accountService.GetCurrentDraft(ctx, 0)
+	response := getListOfContractsResponse{Contracts: contractsResponse}
+	user := auth.GetUser()
+	account, err := h.accountService.GetCurrentDraft(ctx, user.ID)
 	if err != nil && !errors.Is(err, domain.ErrNotFound) {
-		ctx.AbortWithStatusJSON(
-			http.StatusInternalServerError,
-			gin.H{
-				"error": err.Error(),
-			},
-		)
+		newErrorResponse(ctx, err)
 		return
 	}
 
-	filter := ""
-	if request.ContractTypeFilter != nil {
-		filter = string(*request.ContractTypeFilter)
+	if !errors.Is(err, domain.ErrNotFound) {
+		response.Account = &accountResponse{
+			Id:    int(account.Id),
+			Count: account.Count,
+		}
 	}
 
-	ctx.HTML(http.StatusOK, "contracts.gohtml", gin.H{
-		"Contracts": contracts,
-		"Account": gin.H{
-			"Id":    account.Id,
-			"Count": account.Count,
-		},
-		"ContractNameFilter": request.ContractNameFilter,
-		"ContractTypeFilter": filter,
-	})
+	ctx.JSON(http.StatusOK, response)
 }
 
 type getContractByIdRequest struct {
 	Id int `uri:"id"`
 }
 
-func (h *ContractImpl) GetById(ctx *gin.Context) {
+func (h *ContractImpl) Get(ctx *gin.Context) {
 	var request getContractByIdRequest
 	if err := ctx.BindUri(&request); err != nil {
-		ctx.AbortWithStatusJSON(
-			http.StatusBadRequest,
-			gin.H{
-				"error": err.Error(),
-			},
-		)
+		newErrorResponse(ctx, err)
 		return
 	}
 
 	if err := ctx.BindQuery(&request); err != nil {
-		if errors.Is(err, domain.ErrNotFound) {
-			ctx.AbortWithStatusJSON(
-				http.StatusNotFound,
-				gin.H{
-					"error": err.Error(),
-				},
-			)
-			return
-		}
-		ctx.AbortWithStatusJSON(
-			http.StatusBadRequest,
-			gin.H{
-				"error": err.Error(),
-			},
-		)
+		newErrorResponse(ctx, err)
 		return
 	}
 
-	contract, err := h.contractService.GetById(ctx, domain.ContractId(request.Id))
+	contract, err := h.contractService.Get(ctx, domain.ContractId(request.Id))
 	if err != nil {
-		ctx.AbortWithStatusJSON(
-			http.StatusInternalServerError,
-			gin.H{
-				"error": err.Error(),
-			},
-		)
+		newErrorResponse(ctx, err)
 		return
 	}
 
-	ctx.HTML(http.StatusOK, "contract.gohtml", contract)
+	ctx.JSON(http.StatusOK, contractResponse{
+		Id:          int(contract.Id),
+		Name:        contract.Name,
+		Fee:         contract.Fee,
+		Description: contract.Description,
+		ImageUrl:    contract.ImageUrl,
+		Type:        string(contract.Type),
+	})
 }
 
 type addToAccountRequest struct {

@@ -29,8 +29,31 @@ func (s *ContractImpl) GetList(ctx context.Context, filter dto.ContractsFilter) 
 	return s.contractRepository.GetList(ctx, filter)
 }
 
-func (s *ContractImpl) GetById(ctx context.Context, id domain.ContractId) (domain.Contract, error) {
-	return s.contractRepository.GetById(ctx, id)
+func (s *ContractImpl) Get(ctx context.Context, id domain.ContractId) (domain.Contract, error) {
+	return s.contractRepository.Get(ctx, id)
+}
+
+func (s *ContractImpl) Create(ctx context.Context, input AddContractInput) (domain.ContractId, error) {
+	return s.contractRepository.Create(ctx, repository.AddContractInput{
+		Name:        input.Name,
+		Fee:         input.Fee,
+		Description: input.Description,
+		ImageUrl:    input.ImageUrl,
+		Type:        input.Type,
+	})
+}
+
+func (s *ContractImpl) Update(ctx context.Context, id domain.ContractId, input UpdateContractInput) error {
+	return s.contractRepository.Update(ctx, id, repository.UpdateContractInput{
+		Name:        input.Name,
+		Fee:         input.Fee,
+		Description: input.Description,
+		Type:        input.Type,
+	})
+}
+
+func (s *ContractImpl) Delete(ctx context.Context, id domain.ContractId) error {
+	return s.contractRepository.Delete(ctx, id)
 }
 
 func (s *ContractImpl) AddToCurrentDraft(ctx context.Context, id domain.ContractId) error {
@@ -69,4 +92,8 @@ func (s *ContractImpl) getOrCreateAccount(ctx context.Context) (dto.Account, err
 	}
 
 	return draft, nil
+}
+
+func (s *ContractImpl) UpdateImage(ctx context.Context, id domain.ContractId) error {
+	panic("not implemented") // todo. implement
 }

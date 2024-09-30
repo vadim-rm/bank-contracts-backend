@@ -46,7 +46,7 @@ func (r *ContractImpl) GetList(ctx context.Context, filter dto.ContractsFilter) 
 	return contracts, nil
 }
 
-func (r *ContractImpl) GetById(ctx context.Context, id domain.ContractId) (domain.Contract, error) {
+func (r *ContractImpl) Get(ctx context.Context, id domain.ContractId) (domain.Contract, error) {
 	var contract entity.Contract
 
 	err := r.db.WithContext(ctx).Where(entity.Contract{ID: uint(id)}).First(&contract).Error
@@ -58,6 +58,68 @@ func (r *ContractImpl) GetById(ctx context.Context, id domain.ContractId) (domai
 	}
 
 	return contract.ToDomain(), nil
+}
+
+func (r *ContractImpl) Add(ctx context.Context, input AddContractInput) (domain.ContractId, error) {
+	contract := entity.Contract{
+		Name:        input.Name,
+		Fee:         input.Fee,
+		Description: input.Description,
+		ImageUrl:    input.ImageUrl,
+		Type:        string(input.Type),
+	}
+
+	err := r.db.WithContext(ctx).Create(&contract).Error
+	if err != nil {
+		return 0, err
+	}
+
+	return domain.ContractId(contract.ID), nil
+}
+
+func (r *ContractImpl) Update(ctx context.Context, id domain.ContractId, input UpdateContractInput) error {
+	contract := entity.Contract{
+		ID: uint(id),
+	}
+
+	updateColumns := make([]string, 0)
+	updateValues := make(map[string]any)
+
+	if input.Name != nil {
+		updateColumns = append(updateColumns, "Name")
+		updateValues["Name"] = *input.Name
+	}
+
+	if input.Fee != nil {
+		updateColumns = append(updateColumns, "Fee")
+		updateValues["Fee"] = *input.Fee
+	}
+
+	if input.Description != nil {
+		updateColumns = append(updateColumns, "Description")
+		updateValues["Description"] = *input.Description
+	}
+
+	if input.ImageUrl != nil {
+		updateColumns = append(updateColumns, "ImageUrl")
+		updateValues["ImageUrl"] = *input.ImageUrl
+	}
+
+	if input.Type != nil {
+		updateColumns = append(updateColumns, "Type")
+		updateValues["Type"] = *input.Type
+	}
+
+	err := r.db.WithContext(ctx).Model(&contract).Select(updateColumns).Updates(updateValues).Error
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *ContractImpl) Delete(ctx context.Context, id domain.ContractId) error {
+	return r.db.WithContext(ctx).Delete(&entity.Contract{}, id).Error
 }
 
 func (r *ContractImpl) AddToAccount(ctx context.Context, input AddToAccountInput) error {

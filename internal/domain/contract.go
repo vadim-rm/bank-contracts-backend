@@ -7,19 +7,19 @@ type ContractType string
 type Contract struct {
 	Id          ContractId
 	Name        string
-	Fee         *int32
+	Fee         int32
 	Description *string
 	ImageUrl    *string
-	Type        *ContractType
+	Type        ContractType
 }
 
 type AccountContract struct {
 	Id          ContractId
 	Name        string
-	Fee         *int32
+	Fee         int32
 	Description *string
 	ImageUrl    *string
-	Type        *ContractType
+	Type        ContractType
 
 	IsMain bool
 }

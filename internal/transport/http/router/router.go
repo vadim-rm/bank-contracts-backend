@@ -8,8 +8,7 @@ import (
 )
 
 type Config struct {
-	DebugCors     bool
-	TemplatesPath string
+	DebugCors bool
 }
 
 func New(config Config) *gin.Engine {
@@ -18,10 +17,6 @@ func New(config Config) *gin.Engine {
 	if config.DebugCors {
 		router.Use(cors.Default())
 	}
-
-	router.LoadHTMLGlob(config.TemplatesPath)
-
-	router.Static("/static", "./static") //todo add to config
 
 	router.NoRoute(func(c *gin.Context) {
 		c.JSON(

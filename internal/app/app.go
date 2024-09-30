@@ -59,8 +59,7 @@ func Run() {
 	contractHandler := handler.NewContractImpl(contractService, accountService)
 
 	engine := router.New(router.Config{
-		DebugCors:     cfg.App.Debug,
-		TemplatesPath: cfg.App.TemplatesPath,
+		DebugCors: cfg.App.Debug,
 	})
 
 	external_routes.Initialize(engine, contractHandler, accountHandler)

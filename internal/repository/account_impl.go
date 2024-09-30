@@ -19,6 +19,37 @@ func NewAccountImpl(db *gorm.DB) *AccountImpl {
 	}
 }
 
+func (r *AccountImpl) GetList(ctx context.Context, id domain.UserId, filter dto.AccountsFilter) ([]domain.Account, error) {
+	var dbAccounts []entity.Account
+
+	query := r.db.WithContext(ctx).Where(
+		"(creator = ? OR moderator = ?) AND status != ?", id, id, domain.AccountStatusDeleted,
+	)
+
+	if filter.Status != nil {
+		query = query.Where(map[string]any{
+			"status": *filter.Status,
+		})
+	}
+
+	if filter.From != nil {
+		query = query.Where(map[string]any{
+			"created_at": *filter.From,
+		})
+	}
+
+	if err := query.Find(&dbAccounts).Error; err != nil {
+		return nil, err
+	}
+
+	accounts := make([]domain.Account, 0)
+	for _, account := range dbAccounts {
+		accounts = append(accounts, account.ToDomain())
+	}
+
+	return accounts, nil
+}
+
 func (r *AccountImpl) Create(ctx context.Context, input CreateAccountInput) (domain.AccountId, error) {
 	account := entity.Account{
 		CreatedAt: input.CreatedAt,
@@ -36,20 +67,20 @@ func (r *AccountImpl) Create(ctx context.Context, input CreateAccountInput) (dom
 type contractWithIsMain struct {
 	ID          uint
 	Name        string
-	Fee         *int32
+	Fee         int32
 	Description *string
 	ImageUrl    *string
-	Type        *string
+	Type        string
 
 	Deleted bool
 	IsMain  bool
 }
 
-func (r *AccountImpl) GetById(ctx context.Context, id domain.AccountId) (domain.Account, error) {
+func (r *AccountImpl) Get(ctx context.Context, id domain.AccountId) (domain.Account, error) {
 	var account entity.Account
 
 	err := r.db.WithContext(ctx).Where(entity.Account{ID: uint(id)}).
-		Where("deleted = ?", false).
+		Where("status != ?", domain.AccountStatusDeleted).
 		First(&account).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -80,7 +111,7 @@ func (r *AccountImpl) GetById(ctx context.Context, id domain.AccountId) (domain.
 			Fee:         c.Fee,
 			Description: c.Description,
 			ImageUrl:    c.ImageUrl,
-			Type:        (*domain.ContractType)(c.Type),
+			Type:        domain.ContractType(c.Type),
 			IsMain:      c.IsMain,
 		}
 		accountContracts = append(accountContracts, accountContract)
@@ -128,6 +159,47 @@ func (r *AccountImpl) GetCurrentDraft(ctx context.Context, userId domain.UserId)
 		Id:    domain.AccountId(account.ID),
 		Count: int(count),
 	}, nil
+}
+
+func (r *AccountImpl) Update(ctx context.Context, id domain.AccountId, input UpdateAccountInput) error {
+	account := entity.Account{
+		ID: uint(id),
+	}
+
+	updateColumns := make([]string, 0)
+	updateValues := make(map[string]any)
+
+	if input.RequestedAt != nil {
+		updateColumns = append(updateColumns, "RequestedAt")
+		updateValues["RequestedAt"] = *input.RequestedAt
+	}
+
+	if input.FinishedAt != nil {
+		updateColumns = append(updateColumns, "FinishedAt")
+		updateValues["FinishedAt"] = *input.RequestedAt
+	}
+
+	if input.Status != nil {
+		updateColumns = append(updateColumns, "Status")
+		updateValues["Status"] = *input.RequestedAt
+	}
+
+	if input.Number != nil {
+		updateColumns = append(updateColumns, "Number")
+		updateValues["Number"] = *input.RequestedAt
+	}
+
+	if input.Moderator != nil {
+		updateColumns = append(updateColumns, "Moderator")
+		updateValues["Moderator"] = *input.RequestedAt
+	}
+
+	err := r.db.WithContext(ctx).Model(&account).Select(updateColumns).Updates(updateValues).Error
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (r *AccountImpl) Delete(ctx context.Context, id domain.AccountId) error {

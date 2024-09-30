@@ -34,7 +34,7 @@ func (h *AccountImpl) GetById(ctx *gin.Context) {
 		return
 	}
 
-	order, err := h.service.GetById(ctx, domain.AccountId(request.Id))
+	order, err := h.service.Get(ctx, domain.AccountId(request.Id))
 	if err != nil {
 		if errors.Is(err, domain.ErrNotFound) {
 			ctx.AbortWithStatusJSON(
