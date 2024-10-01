@@ -19,8 +19,8 @@ func Initialize(
 	accounts := parent.Group("accounts")
 	{
 		initializeAccounts(accounts, accountHandler)
-		initializeAccountContracts(accounts, accountContractsHandler)
 	}
+	initializeAccountContracts(parent, accountContractsHandler)
 }
 
 func initializeContracts(parent *gin.RouterGroup, contractHandler handler.Contract) {
@@ -35,14 +35,14 @@ func initializeContracts(parent *gin.RouterGroup, contractHandler handler.Contra
 
 func initializeAccounts(parent *gin.RouterGroup, accountsHandler handler.Account) {
 	parent.GET("", accountsHandler.GetList)
-	parent.GET(":id", accountsHandler.Get)
-	parent.PUT(":id", accountsHandler.Update)
-	parent.PUT(":id/submit", accountsHandler.Submit)
-	parent.PUT(":id/complete", accountsHandler.Complete)
-	parent.POST(":id", accountsHandler.Delete)
+	parent.GET(":accountId", accountsHandler.Get)
+	parent.PUT(":accountId", accountsHandler.Update)
+	parent.PUT(":accountId/submit", accountsHandler.Submit)
+	parent.PUT(":accountId/complete", accountsHandler.Complete)
+	parent.DELETE(":accountId", accountsHandler.Delete)
 }
 
-func initializeAccountContracts(parent *gin.RouterGroup, accountContractsHandler handler.AccountContracts) {
+func initializeAccountContracts(parent *gin.Engine, accountContractsHandler handler.AccountContracts) {
 	parent.DELETE("/accounts/:accountId/contract/:contractId", accountContractsHandler.Delete)
 	parent.PUT("/accounts/:accountId/contract/:contractId/main", accountContractsHandler.SetMain)
 }

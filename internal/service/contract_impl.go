@@ -34,7 +34,7 @@ func (s *ContractImpl) Get(ctx context.Context, id domain.ContractId) (domain.Co
 }
 
 func (s *ContractImpl) Create(ctx context.Context, input CreateContractInput) (domain.ContractId, error) {
-	return s.contractRepository.Create(ctx, repository.CreateContractInput{
+	return s.contractRepository.Add(ctx, repository.AddContractInput{
 		Name:        input.Name,
 		Fee:         input.Fee,
 		Description: input.Description,

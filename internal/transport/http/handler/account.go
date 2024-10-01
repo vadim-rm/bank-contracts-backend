@@ -9,5 +9,4 @@ type Account interface {
 	Submit(ctx *gin.Context)
 	Complete(ctx *gin.Context)
 	Delete(ctx *gin.Context)
-	GetById(ctx *gin.Context)
 }

@@ -90,7 +90,7 @@ func (r *AccountImpl) Get(ctx context.Context, id domain.AccountId) (domain.Acco
 	}
 	var contracts []contractWithIsMain
 	err = r.db.WithContext(ctx).Table("contracts").
-		Select("contracts.id as contract_id, contracts.name, contracts.fee, contracts.description, contracts.image_url, contracts.type, account_contracts.is_main").
+		Select("contracts.id as id, contracts.name, contracts.fee, contracts.description, contracts.image_url, contracts.type, account_contracts.is_main").
 		Joins("JOIN account_contracts ON account_contracts.contract_id = contracts.id").
 		Joins("JOIN accounts ON account_contracts.account_id = accounts.id").
 		Where("account_contracts.account_id = ? AND accounts.status <> ?", id, domain.AccountStatusDeleted).
@@ -122,6 +122,7 @@ func (r *AccountImpl) Get(ctx context.Context, id domain.AccountId) (domain.Acco
 		CreatedAt:   account.CreatedAt,
 		RequestedAt: account.RequestedAt,
 		FinishedAt:  account.FinishedAt,
+		Number:      (*domain.AccountNumber)(account.Number),
 		Status:      domain.AccountStatus(account.Status),
 		Creator:     domain.UserId(account.Creator),
 		Moderator:   (*domain.UserId)(account.Moderator),
@@ -136,7 +137,7 @@ func (r *AccountImpl) GetCurrentDraft(ctx context.Context, userId domain.UserId)
 		Where(entity.Account{
 			Creator: uint(userId),
 		}).
-		Where("status <> ?", domain.AccountStatusDeleted).
+		Where("status = ?", domain.AccountStatusDraft).
 		First(&account).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -176,22 +177,22 @@ func (r *AccountImpl) Update(ctx context.Context, id domain.AccountId, input Upd
 
 	if input.FinishedAt != nil {
 		updateColumns = append(updateColumns, "FinishedAt")
-		updateValues["FinishedAt"] = *input.RequestedAt
+		updateValues["FinishedAt"] = *input.FinishedAt
 	}
 
 	if input.Status != nil {
 		updateColumns = append(updateColumns, "Status")
-		updateValues["Status"] = *input.RequestedAt
+		updateValues["Status"] = *input.Status
 	}
 
 	if input.Number != nil {
 		updateColumns = append(updateColumns, "Number")
-		updateValues["Number"] = *input.RequestedAt
+		updateValues["Number"] = *input.Number
 	}
 
 	if input.Moderator != nil {
 		updateColumns = append(updateColumns, "Moderator")
-		updateValues["Moderator"] = *input.RequestedAt
+		updateValues["Moderator"] = *input.Moderator
 	}
 
 	err := r.db.WithContext(ctx).Model(&account).Select(updateColumns).Updates(updateValues).Error

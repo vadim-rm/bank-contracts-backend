@@ -51,18 +51,21 @@ func Run() {
 
 	contractRepository := repository.NewContractImpl(db)
 	accountRepository := repository.NewAccountImpl(db)
+	accountContractsRepository := repository.NewAccountContractsImpl(db)
 
 	contractService := service.NewContractImpl(contractRepository, accountRepository)
 	accountService := service.NewAccountImpl(accountRepository)
+	accountContractsService := service.NewAccountContractsImpl(accountContractsRepository, accountRepository)
 
 	accountHandler := handler.NewAccountImpl(accountService)
 	contractHandler := handler.NewContractImpl(contractService, accountService)
+	accountContractsHandler := handler.NewAccountContractsImpl(accountContractsService)
 
 	engine := router.New(router.Config{
 		DebugCors: cfg.App.Debug,
 	})
 
-	external_routes.Initialize(engine, contractHandler, accountHandler)
+	external_routes.Initialize(engine, contractHandler, accountHandler, accountContractsHandler)
 
 	srv := &http.Server{
 		Addr:    fmt.Sprintf("%s:%d", cfg.Http.Host, cfg.Http.Port),

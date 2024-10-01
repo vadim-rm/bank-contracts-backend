@@ -16,12 +16,9 @@ func NewAccountContractsImpl(db *gorm.DB) *AccountContractsImpl {
 }
 
 func (r *AccountContractsImpl) RemoveContractFromAccount(ctx context.Context, contractId domain.ContractId, accountId domain.AccountId) error {
-	accountContract := entity.AccountContracts{
-		AccountID:  uint(accountId),
-		ContractID: uint(contractId),
-	}
-
-	return r.db.WithContext(ctx).Delete(&accountContract).Error
+	return r.db.WithContext(ctx).
+		Where("account_id = ? AND contract_id = ?", accountId, contractId).
+		Delete(entity.AccountContracts{}).Error
 }
 
 func (r *AccountContractsImpl) SetMain(ctx context.Context, contractId domain.ContractId, accountId domain.AccountId) error {
@@ -35,6 +32,7 @@ func (r *AccountContractsImpl) SetMain(ctx context.Context, contractId domain.Co
 
 		err = r.db.WithContext(ctx).Model(entity.AccountContracts{}).
 			Where("account_id = ? AND contract_id != ?", accountId, contractId).
+			Select("IsMain").
 			Updates(entity.AccountContracts{IsMain: false}).Error
 		if err != nil {
 			return err

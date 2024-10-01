@@ -77,6 +77,7 @@ func (s *AccountImpl) Complete(ctx context.Context, id domain.AccountId, status 
 	return s.repository.Update(ctx, id, repository.UpdateAccountInput{
 		Moderator:  &user.ID,
 		FinishedAt: &now,
+		Status:     &status,
 		// todo рассчитывается при завершении заявки (вычисление стоимости заказа, даты доставки в течении месяца, вычисления в м-м).
 	})
 }
