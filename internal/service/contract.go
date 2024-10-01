@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/vadim-rm/bmstu-web-backend/internal/domain"
 	"github.com/vadim-rm/bmstu-web-backend/internal/dto"
+	"io"
 )
 
 type Contract interface {
@@ -13,7 +14,7 @@ type Contract interface {
 	Update(ctx context.Context, id domain.ContractId, input UpdateContractInput) error
 	Delete(ctx context.Context, id domain.ContractId) error
 	AddToCurrentDraft(ctx context.Context, id domain.ContractId) error
-	UpdateImage(ctx context.Context, id domain.ContractId) error
+	UpdateImage(ctx context.Context, id domain.ContractId, input UpdateContractImageInput) error
 }
 
 type CreateContractInput struct {
@@ -29,4 +30,10 @@ type UpdateContractInput struct {
 	Fee         *int32
 	Description *string
 	Type        *domain.ContractType
+}
+
+type UpdateContractImageInput struct {
+	Image       io.Reader
+	Size        int64
+	ContentType string
 }

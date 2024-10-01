@@ -13,15 +13,18 @@ import (
 type ContractImpl struct {
 	contractRepository repository.Contract
 	accountRepository  repository.Account
+	imageRepository    repository.Image
 }
 
 func NewContractImpl(
 	contractRepository repository.Contract,
 	accountRepository repository.Account,
+	imageRepository repository.Image,
 ) *ContractImpl {
 	return &ContractImpl{
 		contractRepository: contractRepository,
 		accountRepository:  accountRepository,
+		imageRepository:    imageRepository,
 	}
 }
 
@@ -94,6 +97,18 @@ func (s *ContractImpl) getOrCreateAccount(ctx context.Context) (dto.Account, err
 	return draft, nil
 }
 
-func (s *ContractImpl) UpdateImage(ctx context.Context, id domain.ContractId) error {
-	panic("not implemented") // todo. implement
+func (s *ContractImpl) UpdateImage(ctx context.Context, id domain.ContractId, input UpdateContractImageInput) error {
+	imageUrl, err := s.imageRepository.Upload(ctx, repository.UploadImageInput{
+		Image:       input.Image,
+		Size:        input.Size,
+		Name:        fmt.Sprintf("%d", id),
+		ContentType: input.ContentType,
+	})
+	if err != nil {
+		return err
+	}
+
+	return s.contractRepository.Update(ctx, id, repository.UpdateContractInput{
+		ImageUrl: &imageUrl,
+	})
 }

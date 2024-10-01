@@ -9,4 +9,5 @@ type Contract interface {
 	Update(ctx *gin.Context)
 	Delete(ctx *gin.Context)
 	AddToAccount(ctx *gin.Context)
+	UpdateImage(ctx *gin.Context)
 }

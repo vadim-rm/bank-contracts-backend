@@ -6,6 +6,7 @@ type Config struct {
 	App      app
 	Http     http
 	Postgres postgres
+	Minio    minio
 }
 
 type app struct {
@@ -23,6 +24,14 @@ type postgres struct {
 	User     string `env:"POSTGRES_USER"`
 	Password string `env:"POSTGRES_PASSWORD"`
 	DbName   string `env:"POSTGRES_DBNAME"`
+}
+
+type minio struct {
+	Endpoint   string `env:"MINIO_ENDPOINT"`
+	Id         string `env:"MINIO_ID"`
+	Secret     string `env:"MINIO_SECRET"`
+	BucketName string `env:"MINIO_BUCKET_NAME"`
+	BaseUrl    string `env:"MINIO_BASE_URL"`
 }
 
 func Load() (Config, error) {

@@ -36,7 +36,7 @@ func initializeContracts(parent *gin.RouterGroup, contractHandler handler.Contra
 	parent.PUT(":id", contractHandler.Update)
 	parent.DELETE(":id", contractHandler.Delete)
 	parent.POST(":id/draft", contractHandler.AddToAccount)
-	// todo. add image upload
+	parent.PUT(":id/image", contractHandler.UpdateImage)
 }
 
 func initializeAccounts(parent *gin.RouterGroup, accountsHandler handler.Account) {

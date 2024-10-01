@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/minio/minio-go/v7"
+	"github.com/minio/minio-go/v7/pkg/credentials"
 	"github.com/vadim-rm/bmstu-web-backend/internal/config"
 	"github.com/vadim-rm/bmstu-web-backend/internal/repository"
 	"github.com/vadim-rm/bmstu-web-backend/internal/repository/entity"
@@ -49,12 +51,25 @@ func Run() {
 		return
 	}
 
+	minioClient, err := minio.New(cfg.Minio.Endpoint, &minio.Options{
+		Creds:  credentials.NewStaticV4(cfg.Minio.Id, cfg.Minio.Secret, ""),
+		Secure: false, // Use true if using HTTPS
+	})
+	if err != nil {
+		logger.Fatalf("error initializing minio: %s", err.Error())
+		return
+	}
+
 	contractRepository := repository.NewContractImpl(db)
 	accountRepository := repository.NewAccountImpl(db)
 	accountContractsRepository := repository.NewAccountContractsImpl(db)
 	usersRepository := repository.NewUserImpl(db)
+	imageRepository := repository.NewImageImpl(minioClient, repository.ImageConfig{
+		BucketName: cfg.Minio.BucketName,
+		BaseUrl:    cfg.Minio.BaseUrl,
+	})
 
-	contractService := service.NewContractImpl(contractRepository, accountRepository)
+	contractService := service.NewContractImpl(contractRepository, accountRepository, imageRepository)
 	accountService := service.NewAccountImpl(accountRepository)
 	accountContractsService := service.NewAccountContractsImpl(accountContractsRepository, accountRepository)
 	usersService := service.NewUserImpl(usersRepository)

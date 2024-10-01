@@ -10,5 +10,3 @@ type User struct {
 	CreatorIn   []Account `gorm:"foreignKey:Creator"`
 	ModeratorIn []Account `gorm:"foreignKey:Moderator"`
 }
-
-// todo. Сделать действия для пользователя

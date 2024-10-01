@@ -229,3 +229,34 @@ func (h *ContractImpl) AddToAccount(ctx *gin.Context) {
 
 	ctx.Status(http.StatusOK)
 }
+
+type updateImageRequest struct {
+	Id int `uri:"id"`
+}
+
+func (h *ContractImpl) UpdateImage(ctx *gin.Context) {
+	var request updateImageRequest
+	if err := ctx.BindUri(&request); err != nil {
+		newErrorResponse(ctx, err)
+		return
+	}
+
+	file, header, err := ctx.Request.FormFile("image")
+	if err != nil {
+		newErrorResponse(ctx, err)
+		return
+	}
+	defer file.Close()
+
+	err = h.contractService.UpdateImage(ctx, domain.ContractId(request.Id), service.UpdateContractImageInput{
+		Image:       file,
+		Size:        header.Size,
+		ContentType: header.Header.Get("Content-Type"),
+	})
+	if err != nil {
+		newErrorResponse(ctx, err)
+		return
+	}
+
+	ctx.Status(http.StatusOK)
+}
