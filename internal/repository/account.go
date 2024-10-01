@@ -28,4 +28,5 @@ type UpdateAccountInput struct {
 	Status      *domain.AccountStatus
 	Number      *domain.AccountNumber
 	Moderator   *domain.UserId
+	TotalFee    *int32
 }

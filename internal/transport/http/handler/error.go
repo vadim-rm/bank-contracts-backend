@@ -12,4 +12,5 @@ func newErrorResponse(ctx *gin.Context, err error) {
 			"error": err.Error(),
 		},
 	)
+	// todo change status code (errors is bind error gin)
 }

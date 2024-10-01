@@ -48,12 +48,20 @@ func (s *AccountImpl) Submit(ctx context.Context, id domain.AccountId) error {
 		return domain.ErrInvalidTargetStatus
 	}
 
+	var totalFee int32
+	for _, contract := range account.Contracts {
+		totalFee += contract.Fee
+	}
+
+	fmt.Println(totalFee)
+
 	status := domain.AccountStatusApplied
 
 	now := time.Now()
 	return s.repository.Update(ctx, id, repository.UpdateAccountInput{
 		RequestedAt: &now,
 		Status:      &status,
+		TotalFee:    &totalFee,
 	})
 }
 
@@ -78,7 +86,6 @@ func (s *AccountImpl) Complete(ctx context.Context, id domain.AccountId, status 
 		Moderator:  &user.ID,
 		FinishedAt: &now,
 		Status:     &status,
-		// todo рассчитывается при завершении заявки (вычисление стоимости заказа, даты доставки в течении месяца, вычисления в м-м).
 	})
 }
 

@@ -28,5 +28,7 @@ type Account struct {
 	Creator   UserId
 	Moderator *UserId
 
+	TotalFee *int32
+
 	Contracts []AccountContract
 }

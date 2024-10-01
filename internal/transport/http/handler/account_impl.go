@@ -40,6 +40,8 @@ type getAccountsListAccount struct {
 
 	Creator   domain.UserId  `json:"creator"`
 	Moderator *domain.UserId `json:"moderator,omitempty"`
+
+	TotalFee *int32 `json:"totalFee"`
 }
 
 func (h *AccountImpl) GetList(ctx *gin.Context) {
@@ -70,6 +72,7 @@ func (h *AccountImpl) GetList(ctx *gin.Context) {
 			Number:      (*string)(account.Number),
 			Creator:     account.Creator,
 			Moderator:   account.Moderator,
+			TotalFee:    account.TotalFee,
 		})
 	}
 
@@ -94,6 +97,8 @@ type getAccountResponse struct {
 	Creator   domain.UserId  `json:"creator"`
 	Moderator *domain.UserId `json:"moderator"`
 
+	TotalFee *int32 `json:"totalFee"`
+
 	Contracts []accountContractResponse `json:"contracts"`
 }
 
@@ -115,14 +120,14 @@ func (h *AccountImpl) Get(ctx *gin.Context) {
 		return
 	}
 
-	order, err := h.service.Get(ctx, domain.AccountId(request.Id))
+	account, err := h.service.Get(ctx, domain.AccountId(request.Id))
 	if err != nil {
 		newErrorResponse(ctx, err)
 		return
 	}
 
-	contracts := make([]accountContractResponse, 0, len(order.Contracts))
-	for _, contract := range order.Contracts {
+	contracts := make([]accountContractResponse, 0, len(account.Contracts))
+	for _, contract := range account.Contracts {
 		contracts = append(contracts, accountContractResponse{
 			Id:          int(contract.Id),
 			Name:        contract.Name,
@@ -135,15 +140,16 @@ func (h *AccountImpl) Get(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, getAccountResponse{
-		Id:          int(order.Id),
-		CreatedAt:   order.CreatedAt,
-		RequestedAt: order.RequestedAt,
-		FinishedAt:  order.FinishedAt,
-		Status:      string(order.Status),
-		Number:      order.Number,
-		Creator:     order.Creator,
-		Moderator:   order.Moderator,
+		Id:          int(account.Id),
+		CreatedAt:   account.CreatedAt,
+		RequestedAt: account.RequestedAt,
+		FinishedAt:  account.FinishedAt,
+		Status:      string(account.Status),
+		Number:      account.Number,
+		Creator:     account.Creator,
+		Moderator:   account.Moderator,
 		Contracts:   contracts,
+		TotalFee:    account.TotalFee,
 	})
 }
 
@@ -231,23 +237,13 @@ type deleteRequest struct {
 func (h *AccountImpl) Delete(ctx *gin.Context) {
 	var request deleteRequest
 	if err := ctx.BindUri(&request); err != nil {
-		ctx.AbortWithStatusJSON(
-			http.StatusBadRequest,
-			gin.H{
-				"error": err.Error(),
-			},
-		)
+		newErrorResponse(ctx, err)
 		return
 	}
 
 	err := h.service.Delete(ctx, domain.AccountId(request.Id))
 	if err != nil {
-		ctx.AbortWithStatusJSON(
-			http.StatusInternalServerError,
-			gin.H{
-				"error": err.Error(),
-			},
-		)
+		newErrorResponse(ctx, err)
 		return
 	}
 

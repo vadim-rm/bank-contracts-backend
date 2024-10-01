@@ -127,6 +127,7 @@ func (r *AccountImpl) Get(ctx context.Context, id domain.AccountId) (domain.Acco
 		Creator:     domain.UserId(account.Creator),
 		Moderator:   (*domain.UserId)(account.Moderator),
 		Contracts:   accountContracts,
+		TotalFee:    account.TotalFee,
 	}, nil
 }
 
@@ -193,6 +194,11 @@ func (r *AccountImpl) Update(ctx context.Context, id domain.AccountId, input Upd
 	if input.Moderator != nil {
 		updateColumns = append(updateColumns, "Moderator")
 		updateValues["Moderator"] = *input.Moderator
+	}
+
+	if input.TotalFee != nil {
+		updateColumns = append(updateColumns, "TotalFee")
+		updateValues["TotalFee"] = *input.TotalFee
 	}
 
 	err := r.db.WithContext(ctx).Model(&account).Select(updateColumns).Updates(updateValues).Error

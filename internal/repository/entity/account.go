@@ -16,6 +16,8 @@ type Account struct {
 	Creator   uint `gorm:"not null"`
 	Moderator *uint
 
+	TotalFee *int32
+
 	Contracts []Contract `gorm:"many2many:account_contracts"`
 }
 
@@ -29,5 +31,6 @@ func (a Account) ToDomain() domain.Account {
 		Number:      (*domain.AccountNumber)(a.Number),
 		Creator:     domain.UserId(a.Creator),
 		Moderator:   (*domain.UserId)(a.Moderator),
+		TotalFee:    a.TotalFee,
 	}
 }
