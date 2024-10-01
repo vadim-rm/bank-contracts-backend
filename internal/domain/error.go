@@ -8,4 +8,5 @@ var (
 	ErrInvalidTargetStatus = errors.New("ERR_INVALID_TARGET_STATUS")
 	ErrActionNotPermitted  = errors.New("ERR_ACTION_NOT_PERMITTED")
 	ErrWrongAccountStatus  = errors.New("ERR_WRONG_ACCOUNT_STATUS")
+	ErrBadRequest          = errors.New("ERR_BAD_REQUEST")
 )

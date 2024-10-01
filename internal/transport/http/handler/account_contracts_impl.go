@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/vadim-rm/bmstu-web-backend/internal/domain"
 	"github.com/vadim-rm/bmstu-web-backend/internal/service"
@@ -25,7 +26,7 @@ func (h *AccountContractsImpl) Delete(ctx *gin.Context) {
 
 	err := ctx.BindUri(&request)
 	if err != nil {
-		newErrorResponse(ctx, err)
+		newErrorResponse(ctx, errors.Join(domain.ErrBadRequest, err))
 		return
 	}
 
@@ -48,7 +49,7 @@ func (h *AccountContractsImpl) SetMain(ctx *gin.Context) {
 
 	err := ctx.BindUri(&request)
 	if err != nil {
-		newErrorResponse(ctx, err)
+		newErrorResponse(ctx, errors.Join(domain.ErrBadRequest, err))
 		return
 	}
 

@@ -1,8 +1,10 @@
 package handler
 
 import (
+	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/vadim-rm/bmstu-web-backend/internal/auth"
+	"github.com/vadim-rm/bmstu-web-backend/internal/domain"
 	"github.com/vadim-rm/bmstu-web-backend/internal/service"
 	"net/http"
 )
@@ -25,7 +27,7 @@ func (h *UserImpl) Create(ctx *gin.Context) {
 	var request createUserRequest
 	err := ctx.BindJSON(&request)
 	if err != nil {
-		newErrorResponse(ctx, err)
+		newErrorResponse(ctx, errors.Join(domain.ErrBadRequest, err))
 		return
 	}
 
@@ -51,7 +53,7 @@ func (h *UserImpl) Update(ctx *gin.Context) {
 	var request updateUserRequest
 	err := ctx.BindJSON(&request)
 	if err != nil {
-		newErrorResponse(ctx, err)
+		newErrorResponse(ctx, errors.Join(domain.ErrBadRequest, err))
 		return
 	}
 

@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/vadim-rm/bmstu-web-backend/internal/auth"
 	"github.com/vadim-rm/bmstu-web-backend/internal/domain"
@@ -116,13 +117,13 @@ type accountContractResponse struct {
 func (h *AccountImpl) Get(ctx *gin.Context) {
 	var request getAccountRequest
 	if err := ctx.BindUri(&request); err != nil {
-		newErrorResponse(ctx, err)
+		newErrorResponse(ctx, errors.Join(domain.ErrBadRequest, err))
 		return
 	}
 
 	account, err := h.service.Get(ctx, domain.AccountId(request.Id))
 	if err != nil {
-		newErrorResponse(ctx, err)
+		newErrorResponse(ctx, errors.Join(domain.ErrBadRequest, err))
 		return
 	}
 
@@ -162,12 +163,12 @@ func (h *AccountImpl) Update(ctx *gin.Context) {
 	var request updateAccountRequest
 
 	if err := ctx.BindUri(&request); err != nil {
-		newErrorResponse(ctx, err)
+		newErrorResponse(ctx, errors.Join(domain.ErrBadRequest, err))
 		return
 	}
 
 	if err := ctx.BindJSON(&request); err != nil {
-		newErrorResponse(ctx, err)
+		newErrorResponse(ctx, errors.Join(domain.ErrBadRequest, err))
 		return
 	}
 
@@ -190,7 +191,7 @@ func (h *AccountImpl) Submit(ctx *gin.Context) {
 	var request submitAccountRequest
 
 	if err := ctx.BindUri(&request); err != nil {
-		newErrorResponse(ctx, err)
+		newErrorResponse(ctx, errors.Join(domain.ErrBadRequest, err))
 		return
 	}
 
@@ -212,12 +213,12 @@ func (h *AccountImpl) Complete(ctx *gin.Context) {
 	var request completeAccountRequest
 
 	if err := ctx.BindUri(&request); err != nil {
-		newErrorResponse(ctx, err)
+		newErrorResponse(ctx, errors.Join(domain.ErrBadRequest, err))
 		return
 	}
 
 	if err := ctx.BindJSON(&request); err != nil {
-		newErrorResponse(ctx, err)
+		newErrorResponse(ctx, errors.Join(domain.ErrBadRequest, err))
 		return
 	}
 
@@ -237,7 +238,7 @@ type deleteRequest struct {
 func (h *AccountImpl) Delete(ctx *gin.Context) {
 	var request deleteRequest
 	if err := ctx.BindUri(&request); err != nil {
-		newErrorResponse(ctx, err)
+		newErrorResponse(ctx, errors.Join(domain.ErrBadRequest, err))
 		return
 	}
 

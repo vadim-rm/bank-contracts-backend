@@ -52,7 +52,7 @@ type accountResponse struct {
 func (h *ContractImpl) GetList(ctx *gin.Context) {
 	var request getListOfContractsRequest
 	if err := ctx.BindQuery(&request); err != nil {
-		newErrorResponse(ctx, err)
+		newErrorResponse(ctx, errors.Join(domain.ErrBadRequest, err))
 		return
 	}
 
@@ -101,7 +101,7 @@ type getContractByIdRequest struct {
 func (h *ContractImpl) Get(ctx *gin.Context) {
 	var request getContractByIdRequest
 	if err := ctx.BindUri(&request); err != nil {
-		newErrorResponse(ctx, err)
+		newErrorResponse(ctx, errors.Join(domain.ErrBadRequest, err))
 		return
 	}
 
@@ -135,7 +135,7 @@ type createResponse struct {
 func (h *ContractImpl) Create(ctx *gin.Context) {
 	var request createRequest
 	if err := ctx.BindJSON(&request); err != nil {
-		newErrorResponse(ctx, err)
+		newErrorResponse(ctx, errors.Join(domain.ErrBadRequest, err))
 		return
 	}
 
@@ -167,12 +167,12 @@ type updateRequest struct {
 func (h *ContractImpl) Update(ctx *gin.Context) {
 	var request updateRequest
 	if err := ctx.BindUri(&request); err != nil {
-		newErrorResponse(ctx, err)
+		newErrorResponse(ctx, errors.Join(domain.ErrBadRequest, err))
 		return
 	}
 
 	if err := ctx.BindJSON(&request); err != nil {
-		newErrorResponse(ctx, err)
+		newErrorResponse(ctx, errors.Join(domain.ErrBadRequest, err))
 		return
 	}
 
@@ -197,7 +197,7 @@ type deleteContractRequest struct {
 func (h *ContractImpl) Delete(ctx *gin.Context) {
 	var request deleteContractRequest
 	if err := ctx.BindUri(&request); err != nil {
-		newErrorResponse(ctx, err)
+		newErrorResponse(ctx, errors.Join(domain.ErrBadRequest, err))
 		return
 	}
 
@@ -217,7 +217,7 @@ type addToAccountRequest struct {
 func (h *ContractImpl) AddToAccount(ctx *gin.Context) {
 	var request addToAccountRequest
 	if err := ctx.BindUri(&request); err != nil {
-		newErrorResponse(ctx, err)
+		newErrorResponse(ctx, errors.Join(domain.ErrBadRequest, err))
 		return
 	}
 
@@ -237,13 +237,13 @@ type updateImageRequest struct {
 func (h *ContractImpl) UpdateImage(ctx *gin.Context) {
 	var request updateImageRequest
 	if err := ctx.BindUri(&request); err != nil {
-		newErrorResponse(ctx, err)
+		newErrorResponse(ctx, errors.Join(domain.ErrBadRequest, err))
 		return
 	}
 
 	file, header, err := ctx.Request.FormFile("image")
 	if err != nil {
-		newErrorResponse(ctx, err)
+		newErrorResponse(ctx, errors.Join(domain.ErrBadRequest, err))
 		return
 	}
 	defer file.Close()
