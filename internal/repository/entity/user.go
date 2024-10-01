@@ -2,6 +2,7 @@ package entity
 
 type User struct {
 	ID           uint
+	Name         string `gorm:"size:80;not null"`
 	Email        string `gorm:"size:80;not null;unique"`
 	PasswordHash string `gorm:"size:60;not null"`
 	IsModerator  bool   `gorm:"not null"`

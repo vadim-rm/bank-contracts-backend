@@ -10,6 +10,7 @@ func Initialize(
 	contractHandler handler.Contract,
 	accountHandler handler.Account,
 	accountContractsHandler handler.AccountContracts,
+	usersHandler handler.User,
 ) {
 	contracts := parent.Group("contracts")
 	{
@@ -19,6 +20,11 @@ func Initialize(
 	accounts := parent.Group("accounts")
 	{
 		initializeAccounts(accounts, accountHandler)
+	}
+
+	users := parent.Group("users")
+	{
+		initializeUsers(users, usersHandler)
 	}
 	initializeAccountContracts(parent, accountContractsHandler)
 }
@@ -47,4 +53,7 @@ func initializeAccountContracts(parent *gin.Engine, accountContractsHandler hand
 	parent.PUT("/accounts/:accountId/contract/:contractId/main", accountContractsHandler.SetMain)
 }
 
-// todo. crud users
+func initializeUsers(parent *gin.RouterGroup, usersHandler handler.User) {
+	parent.POST("", usersHandler.Create)
+	parent.PUT("", usersHandler.Update)
+}
