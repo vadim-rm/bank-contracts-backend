@@ -23,7 +23,8 @@ func (r *AccountImpl) GetList(ctx context.Context, id domain.UserId, filter dto.
 	var dbAccounts []entity.Account
 
 	query := r.db.WithContext(ctx).Where(
-		"(creator = ? OR moderator = ?) AND status != ?", id, id, domain.AccountStatusDeleted,
+		"(creator = ? OR moderator = ?) AND status != ? AND status != ?", id, id,
+		domain.AccountStatusDeleted, domain.AccountStatusDraft,
 	)
 
 	if filter.Status != nil {
@@ -33,9 +34,7 @@ func (r *AccountImpl) GetList(ctx context.Context, id domain.UserId, filter dto.
 	}
 
 	if filter.From != nil {
-		query = query.Where(map[string]any{
-			"created_at": *filter.From,
-		})
+		query = query.Where("created_at >= ?", *filter.From)
 	}
 
 	if err := query.Find(&dbAccounts).Error; err != nil {

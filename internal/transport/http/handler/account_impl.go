@@ -22,7 +22,7 @@ func NewAccountImpl(service service.Account) *AccountImpl {
 }
 
 type getAccountListRequest struct {
-	Status *string    `json:"type,omitempty"`
+	Status *string    `json:"status,omitempty"`
 	From   *time.Time `json:"from,omitempty"`
 }
 
@@ -34,13 +34,13 @@ type getAccountsListAccount struct {
 	Id int `json:"id"`
 
 	CreatedAt   time.Time  `json:"createdAt"`
-	RequestedAt *time.Time `json:"requestedAt,omitempty"`
-	FinishedAt  *time.Time `json:"finishedAt,omitempty"`
+	RequestedAt *time.Time `json:"requestedAt"`
+	FinishedAt  *time.Time `json:"finishedAt"`
 	Status      string     `json:"status"`
-	Number      *string    `json:"number,omitempty"`
+	Number      *string    `json:"number"`
 
 	Creator   domain.UserId  `json:"creator"`
-	Moderator *domain.UserId `json:"moderator,omitempty"`
+	Moderator *domain.UserId `json:"moderator"`
 
 	TotalFee *int32 `json:"totalFee"`
 }
@@ -90,10 +90,10 @@ type getAccountResponse struct {
 	Id int `json:"id"`
 
 	CreatedAt   time.Time             `json:"createdAt"`
-	RequestedAt *time.Time            `json:"requestedAt,omitempty"`
-	FinishedAt  *time.Time            `json:"finishedAt,omitempty"`
+	RequestedAt *time.Time            `json:"requestedAt"`
+	FinishedAt  *time.Time            `json:"finishedAt"`
 	Status      string                `json:"status"`
-	Number      *domain.AccountNumber `json:"number,omitempty"`
+	Number      *domain.AccountNumber `json:"number"`
 
 	Creator   domain.UserId  `json:"creator"`
 	Moderator *domain.UserId `json:"moderator"`
@@ -107,8 +107,8 @@ type accountContractResponse struct {
 	Id          int     `json:"id"`
 	Name        string  `json:"name"`
 	Fee         int32   `json:"fee"`
-	Description *string `json:"description,omitempty"`
-	ImageUrl    *string `json:"imageUrl,omitempty"`
+	Description *string `json:"description"`
+	ImageUrl    *string `json:"imageUrl"`
 	Type        string  `json:"type"`
 
 	IsMain bool `json:"isMain"`

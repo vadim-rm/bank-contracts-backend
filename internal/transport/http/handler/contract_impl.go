@@ -32,7 +32,7 @@ type getListOfContractsRequest struct {
 
 type getListOfContractsResponse struct {
 	Contracts []contractResponse `json:"contracts"`
-	Account   *accountResponse   `json:"account,omitempty"`
+	Account   accountResponse    `json:"account"`
 }
 
 type contractResponse struct {
@@ -45,8 +45,8 @@ type contractResponse struct {
 }
 
 type accountResponse struct {
-	Id    int `json:"id"`
-	Count int `json:"count"`
+	Id    *int `json:"id"`
+	Count int  `json:"count"`
 }
 
 func (h *ContractImpl) GetList(ctx *gin.Context) {
@@ -85,8 +85,8 @@ func (h *ContractImpl) GetList(ctx *gin.Context) {
 	}
 
 	if !errors.Is(err, domain.ErrNotFound) {
-		response.Account = &accountResponse{
-			Id:    int(account.Id),
+		response.Account = accountResponse{
+			Id:    (*int)(&account.Id),
 			Count: account.Count,
 		}
 	}
