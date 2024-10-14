@@ -21,6 +21,20 @@ type deleteAccountContractRequest struct {
 	ContractId int `uri:"contractId"`
 }
 
+// Delete
+// @Summary Удаление договора из заявки на счёт
+// @Description Удаляет указанный договор из заявки на счёт по их ID.
+// @Tags account-contracts
+// @Accept  json
+// @Produce  json
+// @Param accountId path int true "ID заявки на счёт"
+// @Param contractId path int true "ID договора"
+// @Success 200 "Договор успешно удалён из заявки на счёт"
+// @Failure 400 {object} errorResponse "Неверный запрос"
+// @Failure 404 {object} errorResponse "Заявка на счёт или договор не найдены"
+// @Failure 500 {object} errorResponse "Внутренняя ошибка сервера"
+// @Security Bearer
+// @Router /accounts/{accountId}/contract/{contractId} [delete]
 func (h *AccountContractsImpl) Delete(ctx *gin.Context) {
 	var request deleteAccountContractRequest
 
@@ -44,6 +58,20 @@ type setMainAccountContractRequest struct {
 	ContractId int `uri:"contractId"`
 }
 
+// SetMain
+// @Summary Установить договор основным в заявке на счёт
+// @Description Устанавливает указанный договор в качестве основного для заявки на счёт по их ID.
+// @Tags account-contracts
+// @Accept  json
+// @Produce  json
+// @Param accountId path int true "ID заявки на счёт"
+// @Param contractId path int true "ID договора"
+// @Success 200 "Договор успешно установлен как основной в заявке на счёт"
+// @Failure 400 {object} errorResponse "Неверный запрос"
+// @Failure 404 {object} errorResponse "Заявка на счёт или договор не найдены"
+// @Failure 500 {object} errorResponse "Внутренняя ошибка сервера"
+// @Security Bearer
+// @Router /accounts/{accountId}/contract/{contractId}/main [post]
 func (h *AccountContractsImpl) SetMain(ctx *gin.Context) {
 	var request setMainAccountContractRequest
 

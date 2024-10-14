@@ -1,0 +1,856 @@
+definitions:
+  handler.accountContractResponse:
+    properties:
+      description:
+        type: string
+      fee:
+        type: integer
+      id:
+        type: integer
+      imageUrl:
+        type: string
+      isMain:
+        type: boolean
+      name:
+        type: string
+      type:
+        type: string
+    type: object
+  handler.accountResponse:
+    properties:
+      count:
+        type: integer
+      id:
+        type: integer
+    type: object
+  handler.authenticateUserRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  handler.authenticateUserResponse:
+    properties:
+      accessToken:
+        type: string
+      expiresAt:
+        type: string
+    type: object
+  handler.completeAccountRequest:
+    properties:
+      id:
+        type: integer
+      status:
+        type: string
+    type: object
+  handler.contractResponse:
+    properties:
+      description:
+        type: string
+      fee:
+        type: integer
+      id:
+        type: integer
+      imageUrl:
+        type: string
+      name:
+        type: string
+      type:
+        type: string
+    type: object
+  handler.createRequest:
+    properties:
+      description:
+        type: string
+      fee:
+        type: integer
+      name:
+        type: string
+      type:
+        type: string
+    type: object
+  handler.createResponse:
+    properties:
+      id:
+        type: integer
+    type: object
+  handler.createUserRequest:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - name
+    - password
+    type: object
+  handler.errorResponse:
+    properties:
+      error:
+        type: string
+    type: object
+  handler.getAccountListRequest:
+    properties:
+      from:
+        type: string
+      status:
+        type: string
+    type: object
+  handler.getAccountListResponse:
+    properties:
+      accounts:
+        items:
+          $ref: '#/definitions/handler.getAccountsListAccount'
+        type: array
+    type: object
+  handler.getAccountResponse:
+    properties:
+      contracts:
+        items:
+          $ref: '#/definitions/handler.accountContractResponse'
+        type: array
+      createdAt:
+        type: string
+      creator:
+        type: integer
+      finishedAt:
+        type: string
+      id:
+        type: integer
+      moderator:
+        type: integer
+      number:
+        type: string
+      requestedAt:
+        type: string
+      status:
+        type: string
+      totalFee:
+        type: integer
+    type: object
+  handler.getAccountsListAccount:
+    properties:
+      createdAt:
+        type: string
+      creator:
+        type: integer
+      finishedAt:
+        type: string
+      id:
+        type: integer
+      moderator:
+        type: integer
+      number:
+        type: string
+      requestedAt:
+        type: string
+      status:
+        type: string
+      totalFee:
+        type: integer
+    type: object
+  handler.getListOfContractsResponse:
+    properties:
+      account:
+        $ref: '#/definitions/handler.accountResponse'
+      contracts:
+        items:
+          $ref: '#/definitions/handler.contractResponse'
+        type: array
+    type: object
+  handler.updateAccountRequest:
+    properties:
+      id:
+        type: integer
+      number:
+        type: string
+    type: object
+  handler.updateRequest:
+    properties:
+      description:
+        type: string
+      fee:
+        type: integer
+      id:
+        type: integer
+      name:
+        type: string
+      type:
+        type: string
+    type: object
+  handler.updateUserRequest:
+    properties:
+      name:
+        type: string
+      passwordHash:
+        type: string
+    type: object
+host: localhost:8000
+info:
+  contact: {}
+  title: BMSTU Web Backend
+  version: "1.0"
+paths:
+  /account/{accountId}/complete:
+    post:
+      consumes:
+      - application/json
+      description: Завершает заявку на счёт, обновляя её статус по ID заявки.
+      parameters:
+      - description: ID заявки на счёт
+        in: path
+        name: accountId
+        required: true
+        type: integer
+      - description: Данные для завершения заявки
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.completeAccountRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Заявка на счёт успешно завершена
+        "400":
+          description: Неверный запрос
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "404":
+          description: Заявка на счёт не найдена
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      security:
+      - Bearer: []
+      summary: Завершение заявки на счёт
+      tags:
+      - accounts
+  /account/{accountId}/submit:
+    post:
+      consumes:
+      - application/json
+      description: Отправляет заявку на счёт по её ID для дальнейшей обработки.
+      parameters:
+      - description: ID заявки на счёт
+        in: path
+        name: accountId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Заявка на счёт успешно отправлена
+        "400":
+          description: Неверный запрос
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "404":
+          description: Заявка на счёт не найдена
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      security:
+      - Bearer: []
+      summary: Отправка заявки на счёт
+      tags:
+      - accounts
+  /accounts:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает список всех заявок на счёт с возможностью фильтрации
+        по статусу и дате.
+      parameters:
+      - description: Фильтры для получения заявок на счёт
+        in: body
+        name: request
+        schema:
+          $ref: '#/definitions/handler.getAccountListRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Список заявок на счёт
+          schema:
+            $ref: '#/definitions/handler.getAccountListResponse'
+        "400":
+          description: Неверный запрос
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      security:
+      - Bearer: []
+      summary: Получение списка заявок на счёт
+      tags:
+      - accounts
+  /accounts/{accountId}:
+    delete:
+      consumes:
+      - application/json
+      description: Удаляет заявку на счёт по её ID.
+      parameters:
+      - description: ID заявки на счёт
+        in: path
+        name: accountId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Заявка на счёт успешно удалена
+        "400":
+          description: Неверный запрос
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "404":
+          description: Заявка на счёт не найдена
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      security:
+      - Bearer: []
+      summary: Удаление заявки на счёт
+      tags:
+      - accounts
+    get:
+      consumes:
+      - application/json
+      description: Возвращает подробную информацию о конкретной заявке на счёт по
+        её ID, включая связанные договоры.
+      parameters:
+      - description: ID заявки на счёт
+        in: path
+        name: accountId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Детали заявки на счёт
+          schema:
+            $ref: '#/definitions/handler.getAccountResponse'
+        "400":
+          description: Неверный запрос
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "404":
+          description: Заявка на счёт не найдена
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      security:
+      - Bearer: []
+      summary: Получение информации о заявке на счёт
+      tags:
+      - accounts
+    put:
+      consumes:
+      - application/json
+      description: Обновляет номер заявки на счёт по её ID.
+      parameters:
+      - description: ID заявки на счёт
+        in: path
+        name: accountId
+        required: true
+        type: integer
+      - description: Данные для обновления заявки
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.updateAccountRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Заявка на счёт успешно обновлена
+        "400":
+          description: Неверный запрос
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "404":
+          description: Заявка на счёт не найдена
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      security:
+      - Bearer: []
+      summary: Обновление информации о заявке на счёт
+      tags:
+      - accounts
+  /accounts/{accountId}/contract/{contractId}:
+    delete:
+      consumes:
+      - application/json
+      description: Удаляет указанный договор из заявки на счёт по их ID.
+      parameters:
+      - description: ID заявки на счёт
+        in: path
+        name: accountId
+        required: true
+        type: integer
+      - description: ID договора
+        in: path
+        name: contractId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Договор успешно удалён из заявки на счёт
+        "400":
+          description: Неверный запрос
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "404":
+          description: Заявка на счёт или договор не найдены
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      security:
+      - Bearer: []
+      summary: Удаление договора из заявки на счёт
+      tags:
+      - account-contracts
+  /accounts/{accountId}/contract/{contractId}/main:
+    post:
+      consumes:
+      - application/json
+      description: Устанавливает указанный договор в качестве основного для заявки
+        на счёт по их ID.
+      parameters:
+      - description: ID заявки на счёт
+        in: path
+        name: accountId
+        required: true
+        type: integer
+      - description: ID договора
+        in: path
+        name: contractId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Договор успешно установлен как основной в заявке на счёт
+        "400":
+          description: Неверный запрос
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "404":
+          description: Заявка на счёт или договор не найдены
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      security:
+      - Bearer: []
+      summary: Установить договор основным в заявке на счёт
+      tags:
+      - account-contracts
+  /contracts:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает список договоров с возможностью фильтрации по названию
+        и типу договора
+      parameters:
+      - description: Фильтр по названию договора
+        in: query
+        name: contractName
+        type: string
+      - description: Фильтр по типу договора
+        in: query
+        name: contractType
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Список договоров и учетная запись
+          schema:
+            $ref: '#/definitions/handler.getListOfContractsResponse'
+        "400":
+          description: Неверный запрос
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      summary: Получение списка договоров
+      tags:
+      - contracts
+    post:
+      consumes:
+      - application/json
+      description: Создает новый договор с указанными данными.
+      parameters:
+      - description: Данные для создания договора
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.createRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Успешное создание договора
+          schema:
+            $ref: '#/definitions/handler.createResponse'
+        "400":
+          description: Неверный запрос
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      security:
+      - Bearer: []
+      summary: Создание нового договора
+      tags:
+      - contracts
+  /contracts/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Удаляет существующий договор по его ID.
+      parameters:
+      - description: ID договора
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Договор успешно удален
+        "400":
+          description: Неверный запрос
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "404":
+          description: Договор не найден
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      security:
+      - Bearer: []
+      summary: Удаление договора
+      tags:
+      - contracts
+    get:
+      consumes:
+      - application/json
+      description: Возвращает информацию о договоре по его ID.
+      parameters:
+      - description: ID договора
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Информация о договоре
+          schema:
+            $ref: '#/definitions/handler.contractResponse'
+        "400":
+          description: Неверный запрос
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "404":
+          description: Договор не найден
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      summary: Получение информации о договоре
+      tags:
+      - contracts
+    put:
+      consumes:
+      - application/json
+      description: Обновляет данные существующего договора по его ID.
+      parameters:
+      - description: ID договора
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Данные для обновления договора
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.updateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Договор успешно обновлен
+        "400":
+          description: Неверный запрос
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "404":
+          description: Договор не найден
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      security:
+      - Bearer: []
+      summary: Обновление данных договора
+      tags:
+      - contracts
+  /contracts/{id}/draft:
+    post:
+      consumes:
+      - application/json
+      description: Добавляет существующий договор в текущую заявку на счёт по его
+        ID.
+      parameters:
+      - description: ID договора
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Договор успешно добавлен в заявку на счёт
+        "400":
+          description: Неверный запрос
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "404":
+          description: Договор не найден
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      security:
+      - Bearer: []
+      summary: Добавление договора в заявку на счёт
+      tags:
+      - account-contracts
+  /contracts/{id}/image:
+    put:
+      consumes:
+      - multipart/form-data
+      description: Обновляет изображение для договора по его ID
+      parameters:
+      - description: ID договора
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Файл изображения для загрузки
+        in: formData
+        name: image
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Изображение успешно обновлено
+        "400":
+          description: Неверный запрос
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "404":
+          description: Договор не найден
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      security:
+      - Bearer: []
+      summary: Обновление изображения договора
+      tags:
+      - contracts
+  /users:
+    post:
+      consumes:
+      - application/json
+      description: Создает нового пользователя с указанными именем, электронной почтой
+        и паролем.
+      parameters:
+      - description: Данные для создания пользователя
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.createUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Пользователь успешно создан
+        "400":
+          description: Неверный запрос
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      summary: Создание нового пользователя
+      tags:
+      - users
+    put:
+      consumes:
+      - application/json
+      description: Обновляет имя и/или пароль текущего пользователя.
+      parameters:
+      - description: Данные для обновления пользователя
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.updateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Данные пользователя успешно обновлены
+        "400":
+          description: Неверный запрос
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "401":
+          description: Неавторизован
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      security:
+      - Bearer: []
+      summary: Обновление данных текущего пользователя
+      tags:
+      - users
+  /users/login:
+    post:
+      consumes:
+      - application/json
+      description: Аутентифицирует пользователя по электронной почте и паролю и возвращает
+        токен доступа.
+      parameters:
+      - description: Данные для аутентификации пользователя
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.authenticateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешная аутентификация, токен доступа
+          schema:
+            $ref: '#/definitions/handler.authenticateUserResponse'
+        "400":
+          description: Неверный запрос
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "401":
+          description: Неавторизован
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      summary: Аутентификация пользователя
+      tags:
+      - users
+  /users/logout:
+    post:
+      consumes:
+      - application/json
+      description: Завершает сеанс пользователя, аннулируя токен доступа.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Пользователь успешно вышел
+        "400":
+          description: Неверный запрос
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "401":
+          description: Неавторизован
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      security:
+      - Bearer: []
+      summary: Выход пользователя
+      tags:
+      - users
+securityDefinitions:
+  Bearer:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

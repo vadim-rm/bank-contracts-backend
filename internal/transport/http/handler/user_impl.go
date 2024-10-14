@@ -25,6 +25,17 @@ type createUserRequest struct {
 	Password string `json:"password" binding:"required"`
 }
 
+// Create
+// @Summary Создание нового пользователя
+// @Description Создает нового пользователя с указанными именем, электронной почтой и паролем.
+// @Tags users
+// @Accept  json
+// @Produce  json
+// @Param request body createUserRequest true "Данные для создания пользователя"
+// @Success 200 "Пользователь успешно создан"
+// @Failure 400 {object} errorResponse "Неверный запрос"
+// @Failure 500 {object} errorResponse "Внутренняя ошибка сервера"
+// @Router /users [post]
 func (h *UserImpl) Create(ctx *gin.Context) {
 	var request createUserRequest
 	err := ctx.BindJSON(&request)
@@ -51,6 +62,19 @@ type updateUserRequest struct {
 	PasswordHash *string `json:"passwordHash,omitempty"`
 }
 
+// Update
+// @Summary Обновление данных текущего пользователя
+// @Description Обновляет имя и/или пароль текущего пользователя.
+// @Tags users
+// @Accept  json
+// @Produce  json
+// @Param request body updateUserRequest true "Данные для обновления пользователя"
+// @Success 200 "Данные пользователя успешно обновлены"
+// @Failure 400 {object} errorResponse "Неверный запрос"
+// @Failure 401 {object} errorResponse "Неавторизован"
+// @Failure 500 {object} errorResponse "Внутренняя ошибка сервера"
+// @Security Bearer
+// @Router /users [put]
 func (h *UserImpl) Update(ctx *gin.Context) {
 	var request updateUserRequest
 	err := ctx.BindJSON(&request)
@@ -87,6 +111,18 @@ type authenticateUserResponse struct {
 	AccessToken string    `json:"accessToken"`
 }
 
+// Authenticate
+// @Summary Аутентификация пользователя
+// @Description Аутентифицирует пользователя по электронной почте и паролю и возвращает токен доступа.
+// @Tags users
+// @Accept  json
+// @Produce  json
+// @Param request body authenticateUserRequest true "Данные для аутентификации пользователя"
+// @Success 200 {object} authenticateUserResponse "Успешная аутентификация, токен доступа"
+// @Failure 400 {object} errorResponse "Неверный запрос"
+// @Failure 401 {object} errorResponse "Неавторизован"
+// @Failure 500 {object} errorResponse "Внутренняя ошибка сервера"
+// @Router /users/login [post]
 func (h *UserImpl) Authenticate(ctx *gin.Context) {
 	var request authenticateUserRequest
 	err := ctx.BindJSON(&request)
@@ -110,6 +146,18 @@ func (h *UserImpl) Authenticate(ctx *gin.Context) {
 	})
 }
 
+// Logout
+// @Summary Выход пользователя
+// @Description Завершает сеанс пользователя, аннулируя токен доступа.
+// @Tags users
+// @Accept  json
+// @Produce  json
+// @Success 200 "Пользователь успешно вышел"
+// @Failure 400 {object} errorResponse "Неверный запрос"
+// @Failure 401 {object} errorResponse "Неавторизован"
+// @Failure 500 {object} errorResponse "Внутренняя ошибка сервера"
+// @Security Bearer
+// @Router /users/logout [post]
 func (h *UserImpl) Logout(ctx *gin.Context) {
 	token := ctx.GetHeader("Authorization")
 	token, _ = strings.CutPrefix(token, "Bearer ")

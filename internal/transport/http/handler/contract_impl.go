@@ -49,6 +49,18 @@ type accountResponse struct {
 	Count int  `json:"count"`
 }
 
+// GetList
+// @Summary Получение списка договоров
+// @Description Возвращает список договоров с возможностью фильтрации по названию и типу договора
+// @Tags contracts
+// @Accept  json
+// @Produce  json
+// @Param contractName query string false "Фильтр по названию договора"
+// @Param contractType query string false "Фильтр по типу договора"
+// @Success 200 {object} getListOfContractsResponse "Список договоров и учетная запись"
+// @Failure 400 {object} errorResponse "Неверный запрос"
+// @Failure 500 {object} errorResponse "Внутренняя ошибка сервера"
+// @Router /contracts [get]
 func (h *ContractImpl) GetList(ctx *gin.Context) {
 	var request getListOfContractsRequest
 	if err := ctx.BindQuery(&request); err != nil {
@@ -78,21 +90,18 @@ func (h *ContractImpl) GetList(ctx *gin.Context) {
 
 	response := getListOfContractsResponse{Contracts: contractsResponse}
 	claims, err := auth.GetClaims(ctx)
-	if err != nil {
-		newErrorResponse(ctx, err)
-		return
-	}
+	if err == nil {
+		account, err := h.accountService.GetCurrentDraft(ctx, claims.UserId)
+		if err != nil && !errors.Is(err, domain.ErrNotFound) {
+			newErrorResponse(ctx, err)
+			return
+		}
 
-	account, err := h.accountService.GetCurrentDraft(ctx, claims.UserId)
-	if err != nil && !errors.Is(err, domain.ErrNotFound) {
-		newErrorResponse(ctx, err)
-		return
-	}
-
-	if !errors.Is(err, domain.ErrNotFound) {
-		response.Account = accountResponse{
-			Id:    (*int)(&account.Id),
-			Count: account.Count,
+		if !errors.Is(err, domain.ErrNotFound) {
+			response.Account = accountResponse{
+				Id:    (*int)(&account.Id),
+				Count: account.Count,
+			}
 		}
 	}
 
@@ -103,6 +112,18 @@ type getContractByIdRequest struct {
 	Id int `uri:"id"`
 }
 
+// Get
+// @Summary Получение информации о договоре
+// @Description Возвращает информацию о договоре по его ID.
+// @Tags contracts
+// @Accept  json
+// @Produce  json
+// @Param id path int true "ID договора"
+// @Success 200 {object} contractResponse "Информация о договоре"
+// @Failure 400 {object} errorResponse "Неверный запрос"
+// @Failure 404 {object} errorResponse "Договор не найден"
+// @Failure 500 {object} errorResponse "Внутренняя ошибка сервера"
+// @Router /contracts/{id} [get]
 func (h *ContractImpl) Get(ctx *gin.Context) {
 	var request getContractByIdRequest
 	if err := ctx.BindUri(&request); err != nil {
@@ -137,6 +158,18 @@ type createResponse struct {
 	Id int `json:"id"`
 }
 
+// Create
+// @Summary Создание нового договора
+// @Description Создает новый договор с указанными данными.
+// @Tags contracts
+// @Accept  json
+// @Produce  json
+// @Param request body createRequest true "Данные для создания договора"
+// @Success 201 {object} createResponse "Успешное создание договора"
+// @Failure 400 {object} errorResponse "Неверный запрос"
+// @Failure 500 {object} errorResponse "Внутренняя ошибка сервера"
+// @Security Bearer
+// @Router /contracts [post]
 func (h *ContractImpl) Create(ctx *gin.Context) {
 	var request createRequest
 	if err := ctx.BindJSON(&request); err != nil {
@@ -169,6 +202,20 @@ type updateRequest struct {
 	Type        *domain.ContractType `json:"type,omitempty"`
 }
 
+// Update
+// @Summary Обновление данных договора
+// @Description Обновляет данные существующего договора по его ID.
+// @Tags contracts
+// @Accept  json
+// @Produce  json
+// @Param id path int true "ID договора"
+// @Param request body updateRequest true "Данные для обновления договора"
+// @Success 200 "Договор успешно обновлен"
+// @Failure 400 {object} errorResponse "Неверный запрос"
+// @Failure 404 {object} errorResponse "Договор не найден"
+// @Failure 500 {object} errorResponse "Внутренняя ошибка сервера"
+// @Security Bearer
+// @Router /contracts/{id} [put]
 func (h *ContractImpl) Update(ctx *gin.Context) {
 	var request updateRequest
 	if err := ctx.BindUri(&request); err != nil {
@@ -199,6 +246,19 @@ type deleteContractRequest struct {
 	Id int `uri:"id"`
 }
 
+// Delete godoc
+// @Summary Удаление договора
+// @Description Удаляет существующий договор по его ID.
+// @Tags contracts
+// @Accept  json
+// @Produce  json
+// @Param id path int true "ID договора"
+// @Success 200 "Договор успешно удален"
+// @Failure 400 {object} errorResponse "Неверный запрос"
+// @Failure 404 {object} errorResponse "Договор не найден"
+// @Failure 500 {object} errorResponse "Внутренняя ошибка сервера"
+// @Security Bearer
+// @Router /contracts/{id} [delete]
 func (h *ContractImpl) Delete(ctx *gin.Context) {
 	var request deleteContractRequest
 	if err := ctx.BindUri(&request); err != nil {
@@ -219,6 +279,19 @@ type addToAccountRequest struct {
 	Id int `uri:"id"`
 }
 
+// AddToAccount
+// @Summary Добавление договора в заявку на счёт
+// @Description Добавляет существующий договор в текущую заявку на счёт по его ID.
+// @Tags account-contracts
+// @Accept  json
+// @Produce  json
+// @Param id path int true "ID договора"
+// @Success 200 "Договор успешно добавлен в заявку на счёт"
+// @Failure 400 {object} errorResponse "Неверный запрос"
+// @Failure 404 {object} errorResponse "Договор не найден"
+// @Failure 500 {object} errorResponse "Внутренняя ошибка сервера"
+// @Security Bearer
+// @Router /contracts/{id}/draft [post]
 func (h *ContractImpl) AddToAccount(ctx *gin.Context) {
 	var request addToAccountRequest
 	if err := ctx.BindUri(&request); err != nil {
@@ -239,6 +312,20 @@ type updateImageRequest struct {
 	Id int `uri:"id"`
 }
 
+// UpdateImage
+// @Summary Обновление изображения договора
+// @Description Обновляет изображение для договора по его ID
+// @Tags contracts
+// @Accept  multipart/form-data
+// @Produce  json
+// @Param id path int true "ID договора"
+// @Param image formData file true "Файл изображения для загрузки"
+// @Success 200 "Изображение успешно обновлено"
+// @Failure 400 {object} errorResponse "Неверный запрос"
+// @Failure 404 {object} errorResponse "Договор не найден"
+// @Failure 500 {object} errorResponse "Внутренняя ошибка сервера"
+// @Security Bearer
+// @Router /contracts/{id}/image [put]
 func (h *ContractImpl) UpdateImage(ctx *gin.Context) {
 	var request updateImageRequest
 	if err := ctx.BindUri(&request); err != nil {

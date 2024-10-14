@@ -44,6 +44,18 @@ type getAccountsListAccount struct {
 	TotalFee *int32 `json:"totalFee"`
 }
 
+// GetList
+// @Summary Получение списка заявок на счёт
+// @Description Возвращает список всех заявок на счёт с возможностью фильтрации по статусу и дате.
+// @Tags accounts
+// @Accept  json
+// @Produce  json
+// @Param request body getAccountListRequest false "Фильтры для получения заявок на счёт"
+// @Success 200 {object} getAccountListResponse "Список заявок на счёт"
+// @Failure 400 {object} errorResponse "Неверный запрос"
+// @Failure 500 {object} errorResponse "Внутренняя ошибка сервера"
+// @Security Bearer
+// @Router /accounts [get]
 func (h *AccountImpl) GetList(ctx *gin.Context) {
 	var request getAccountListRequest
 	if err := ctx.BindJSON(&request); err != nil {
@@ -111,6 +123,19 @@ type accountContractResponse struct {
 	IsMain bool `json:"isMain"`
 }
 
+// Get
+// @Summary Получение информации о заявке на счёт
+// @Description Возвращает подробную информацию о конкретной заявке на счёт по её ID, включая связанные договоры.
+// @Tags accounts
+// @Accept  json
+// @Produce  json
+// @Param accountId path int true "ID заявки на счёт"
+// @Success 200 {object} getAccountResponse "Детали заявки на счёт"
+// @Failure 400 {object} errorResponse "Неверный запрос"
+// @Failure 404 {object} errorResponse "Заявка на счёт не найдена"
+// @Failure 500 {object} errorResponse "Внутренняя ошибка сервера"
+// @Security Bearer
+// @Router /accounts/{accountId} [get]
 func (h *AccountImpl) Get(ctx *gin.Context) {
 	var request getAccountRequest
 	if err := ctx.BindUri(&request); err != nil {
@@ -156,6 +181,20 @@ type updateAccountRequest struct {
 	Number string `json:"number"`
 }
 
+// Update
+// @Summary Обновление информации о заявке на счёт
+// @Description Обновляет номер заявки на счёт по её ID.
+// @Tags accounts
+// @Accept  json
+// @Produce  json
+// @Param accountId path int true "ID заявки на счёт"
+// @Param request body updateAccountRequest true "Данные для обновления заявки"
+// @Success 200 "Заявка на счёт успешно обновлена"
+// @Failure 400 {object} errorResponse "Неверный запрос"
+// @Failure 404 {object} errorResponse "Заявка на счёт не найдена"
+// @Failure 500 {object} errorResponse "Внутренняя ошибка сервера"
+// @Security Bearer
+// @Router /accounts/{accountId} [put]
 func (h *AccountImpl) Update(ctx *gin.Context) {
 	var request updateAccountRequest
 
@@ -184,6 +223,19 @@ type submitAccountRequest struct {
 	Id int `uri:"accountId"`
 }
 
+// Submit
+// @Summary Отправка заявки на счёт
+// @Description Отправляет заявку на счёт по её ID для дальнейшей обработки.
+// @Tags accounts
+// @Accept  json
+// @Produce  json
+// @Param accountId path int true "ID заявки на счёт"
+// @Success 200 "Заявка на счёт успешно отправлена"
+// @Failure 400 {object} errorResponse "Неверный запрос"
+// @Failure 404 {object} errorResponse "Заявка на счёт не найдена"
+// @Failure 500 {object} errorResponse "Внутренняя ошибка сервера"
+// @Security Bearer
+// @Router /account/{accountId}/submit [post]
 func (h *AccountImpl) Submit(ctx *gin.Context) {
 	var request submitAccountRequest
 
@@ -206,6 +258,20 @@ type completeAccountRequest struct {
 	Status string `json:"status"`
 }
 
+// Complete
+// @Summary Завершение заявки на счёт
+// @Description Завершает заявку на счёт, обновляя её статус по ID заявки.
+// @Tags accounts
+// @Accept  json
+// @Produce  json
+// @Param accountId path int true "ID заявки на счёт"
+// @Param request body completeAccountRequest true "Данные для завершения заявки"
+// @Success 200 "Заявка на счёт успешно завершена"
+// @Failure 400 {object} errorResponse "Неверный запрос"
+// @Failure 404 {object} errorResponse "Заявка на счёт не найдена"
+// @Failure 500 {object} errorResponse "Внутренняя ошибка сервера"
+// @Security Bearer
+// @Router /account/{accountId}/complete [post]
 func (h *AccountImpl) Complete(ctx *gin.Context) {
 	var request completeAccountRequest
 
@@ -232,6 +298,19 @@ type deleteRequest struct {
 	Id int `uri:"accountId"`
 }
 
+// Delete
+// @Summary Удаление заявки на счёт
+// @Description Удаляет заявку на счёт по её ID.
+// @Tags accounts
+// @Accept  json
+// @Produce  json
+// @Param accountId path int true "ID заявки на счёт"
+// @Success 200 "Заявка на счёт успешно удалена"
+// @Failure 400 {object} errorResponse "Неверный запрос"
+// @Failure 404 {object} errorResponse "Заявка на счёт не найдена"
+// @Failure 500 {object} errorResponse "Внутренняя ошибка сервера"
+// @Security Bearer
+// @Router /accounts/{accountId} [delete]
 func (h *AccountImpl) Delete(ctx *gin.Context) {
 	var request deleteRequest
 	if err := ctx.BindUri(&request); err != nil {

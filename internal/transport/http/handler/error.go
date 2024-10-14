@@ -4,8 +4,13 @@ import (
 	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/vadim-rm/bmstu-web-backend/internal/domain"
+	"github.com/vadim-rm/bmstu-web-backend/pkg/logger"
 	"net/http"
 )
+
+type errorResponse struct {
+	Error string `json:"error"`
+}
 
 func newErrorResponse(ctx *gin.Context, err error) {
 	code := http.StatusInternalServerError
@@ -27,10 +32,12 @@ func newErrorResponse(ctx *gin.Context, err error) {
 		code = http.StatusUnauthorized
 	}
 
+	logger.Error(err.Error())
+
 	ctx.AbortWithStatusJSON(
 		code,
-		gin.H{
-			"error": err.Error(),
+		errorResponse{
+			Error: err.Error(),
 		},
 	)
 }

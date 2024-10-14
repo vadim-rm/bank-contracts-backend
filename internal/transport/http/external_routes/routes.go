@@ -2,6 +2,9 @@ package external_routes
 
 import (
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
+	_ "github.com/vadim-rm/bmstu-web-backend/docs"
 	"github.com/vadim-rm/bmstu-web-backend/internal/transport/http/handler"
 	"github.com/vadim-rm/bmstu-web-backend/internal/transport/http/middleware"
 )
@@ -14,6 +17,8 @@ func Initialize(
 	accountContractsHandler handler.AccountContracts,
 	usersHandler handler.User,
 ) {
+	parent.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
 	contracts := parent.Group("contracts")
 	{
 		initializeContracts(contracts, authMiddleware, contractHandler)
@@ -34,7 +39,7 @@ func Initialize(
 func initializeContracts(parent *gin.RouterGroup, authMiddleware *middleware.AuthMiddleware, contractHandler handler.Contract) {
 	parent.GET("", contractHandler.GetList)
 	parent.GET(":id", contractHandler.Get)
-	moderator := parent.Use(authMiddleware.WithAuth, authMiddleware.WithModerator)
+	moderator := parent.Group("", authMiddleware.WithAuth, authMiddleware.WithModerator)
 	{
 		moderator.POST("", contractHandler.Create)
 		moderator.PUT(":id", contractHandler.Update)
@@ -45,7 +50,7 @@ func initializeContracts(parent *gin.RouterGroup, authMiddleware *middleware.Aut
 }
 
 func initializeAccounts(parent *gin.RouterGroup, authMiddleware *middleware.AuthMiddleware, accountsHandler handler.Account) {
-	authorized := parent.Use(authMiddleware.WithAuth)
+	authorized := parent.Group("", authMiddleware.WithAuth)
 	{
 		authorized.GET("", accountsHandler.GetList)
 		authorized.GET(":accountId", accountsHandler.Get)
@@ -53,12 +58,12 @@ func initializeAccounts(parent *gin.RouterGroup, authMiddleware *middleware.Auth
 		authorized.PUT(":accountId/submit", accountsHandler.Submit)
 		authorized.DELETE(":accountId", accountsHandler.Delete)
 
-		authorized.Use(authMiddleware.WithModerator).PUT(":accountId/complete", accountsHandler.Complete)
+		authorized.Group("", authMiddleware.WithModerator).PUT(":accountId/complete", accountsHandler.Complete)
 	}
 }
 
 func initializeAccountContracts(parent *gin.Engine, authMiddleware *middleware.AuthMiddleware, accountContractsHandler handler.AccountContracts) {
-	authorized := parent.Use(authMiddleware.WithAuth)
+	authorized := parent.Group("", authMiddleware.WithAuth)
 	{
 		authorized.DELETE("/accounts/:accountId/contract/:contractId", accountContractsHandler.Delete)
 		authorized.PUT("/accounts/:accountId/contract/:contractId/main", accountContractsHandler.SetMain)
@@ -69,7 +74,7 @@ func initializeUsers(parent *gin.RouterGroup, authMiddleware *middleware.AuthMid
 	parent.POST("", usersHandler.Create)
 	parent.POST("login", usersHandler.Authenticate)
 
-	authorized := parent.Use(authMiddleware.WithAuth)
+	authorized := parent.Group("", authMiddleware.WithAuth)
 	{
 		authorized.PUT("", usersHandler.Update)
 		authorized.POST("logout", usersHandler.Logout)
