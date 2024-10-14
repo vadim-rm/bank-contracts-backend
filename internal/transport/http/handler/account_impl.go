@@ -21,8 +21,8 @@ func NewAccountImpl(service service.Account) *AccountImpl {
 }
 
 type getAccountListRequest struct {
-	Status *string    `json:"status,omitempty"`
-	From   *time.Time `json:"from,omitempty"`
+	Status *string    `form:"status,omitempty"`
+	From   *time.Time `form:"from,omitempty"`
 }
 
 type getAccountListResponse struct {
@@ -50,7 +50,8 @@ type getAccountsListAccount struct {
 // @Tags accounts
 // @Accept  json
 // @Produce  json
-// @Param request body getAccountListRequest false "Фильтры для получения заявок на счёт"
+// @Param status query string false "Фильтр по статуса"
+// @Param from query string false "Фильтр по дате"
 // @Success 200 {object} getAccountListResponse "Список заявок на счёт"
 // @Failure 400 {object} errorResponse "Неверный запрос"
 // @Failure 500 {object} errorResponse "Внутренняя ошибка сервера"
@@ -58,7 +59,7 @@ type getAccountsListAccount struct {
 // @Router /accounts [get]
 func (h *AccountImpl) GetList(ctx *gin.Context) {
 	var request getAccountListRequest
-	if err := ctx.BindJSON(&request); err != nil {
+	if err := ctx.BindQuery(&request); err != nil {
 		newErrorResponse(ctx, err)
 		return
 	}
@@ -69,6 +70,7 @@ func (h *AccountImpl) GetList(ctx *gin.Context) {
 	})
 	if err != nil {
 		newErrorResponse(ctx, err)
+		return
 	}
 
 	response := make([]getAccountsListAccount, 0, len(accounts))

@@ -50,7 +50,7 @@ func (a *AuthMiddleware) WithModerator(ctx *gin.Context) {
 	}
 
 	if !claims.IsModerator {
-		ctx.AbortWithStatus(http.StatusUnauthorized)
+		ctx.AbortWithStatus(http.StatusForbidden)
 		logger.Error("user is not moderator")
 		return
 	}

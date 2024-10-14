@@ -96,13 +96,6 @@ definitions:
       error:
         type: string
     type: object
-  handler.getAccountListRequest:
-    properties:
-      from:
-        type: string
-      status:
-        type: string
-    type: object
   handler.getAccountListResponse:
     properties:
       accounts:
@@ -277,11 +270,14 @@ paths:
       description: Возвращает список всех заявок на счёт с возможностью фильтрации
         по статусу и дате.
       parameters:
-      - description: Фильтры для получения заявок на счёт
-        in: body
-        name: request
-        schema:
-          $ref: '#/definitions/handler.getAccountListRequest'
+      - description: Фильтр по статуса
+        in: query
+        name: status
+        type: string
+      - description: Фильтр по дате
+        in: query
+        name: from
+        type: string
       produces:
       - application/json
       responses:

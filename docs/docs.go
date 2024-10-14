@@ -148,12 +148,16 @@ const docTemplate = `{
                 "summary": "Получение списка заявок на счёт",
                 "parameters": [
                     {
-                        "description": "Фильтры для получения заявок на счёт",
-                        "name": "request",
-                        "in": "body",
-                        "schema": {
-                            "$ref": "#/definitions/handler.getAccountListRequest"
-                        }
+                        "type": "string",
+                        "description": "Фильтр по статуса",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Фильтр по дате",
+                        "name": "from",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -1165,17 +1169,6 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "error": {
-                    "type": "string"
-                }
-            }
-        },
-        "handler.getAccountListRequest": {
-            "type": "object",
-            "properties": {
-                "from": {
-                    "type": "string"
-                },
-                "status": {
                     "type": "string"
                 }
             }
