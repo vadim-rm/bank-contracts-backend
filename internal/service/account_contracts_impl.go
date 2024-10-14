@@ -2,6 +2,8 @@ package service
 
 import (
 	"context"
+	"fmt"
+	"github.com/vadim-rm/bmstu-web-backend/internal/auth"
 	"github.com/vadim-rm/bmstu-web-backend/internal/domain"
 	"github.com/vadim-rm/bmstu-web-backend/internal/repository"
 )
@@ -27,6 +29,14 @@ func (s *AccountContractsImpl) RemoveContractFromAccount(ctx context.Context, co
 		return err
 	}
 
+	claims, err := auth.GetClaims(ctx)
+	if err != nil {
+		return fmt.Errorf("error getting claims: %w", err)
+	}
+	if account.Creator != claims.UserId {
+		return domain.ErrActionNotPermitted
+	}
+
 	if account.Status != domain.AccountStatusDraft {
 		return domain.ErrWrongAccountStatus
 	}
@@ -39,5 +49,19 @@ func (s *AccountContractsImpl) RemoveContractFromAccount(ctx context.Context, co
 }
 
 func (s *AccountContractsImpl) SetMain(ctx context.Context, contractId domain.ContractId, accountId domain.AccountId) error {
+	account, err := s.accountsRepository.Get(ctx, accountId)
+	if err != nil {
+		return err
+	}
+
+	claims, err := auth.GetClaims(ctx)
+	if err != nil {
+		return fmt.Errorf("error getting claims: %w", err)
+	}
+
+	if account.Creator != claims.UserId {
+		return domain.ErrActionNotPermitted
+	}
+
 	return s.accountContractsRepository.SetMain(ctx, contractId, accountId)
 }

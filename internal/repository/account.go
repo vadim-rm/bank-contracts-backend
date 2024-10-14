@@ -8,12 +8,18 @@ import (
 )
 
 type Account interface {
-	GetList(ctx context.Context, id domain.UserId, filter dto.AccountsFilter) ([]domain.Account, error)
+	GetList(ctx context.Context, input GetListInput) ([]domain.Account, error)
 	Create(ctx context.Context, input CreateAccountInput) (domain.AccountId, error)
 	Get(ctx context.Context, id domain.AccountId) (domain.Account, error)
 	Update(ctx context.Context, id domain.AccountId, input UpdateAccountInput) error
 	GetCurrentDraft(ctx context.Context, userId domain.UserId) (dto.Account, error)
 	Delete(ctx context.Context, id domain.AccountId) error
+}
+
+type GetListInput struct {
+	CreatorId *domain.UserId
+	From      *time.Time
+	Status    *domain.AccountStatus
 }
 
 type CreateAccountInput struct {

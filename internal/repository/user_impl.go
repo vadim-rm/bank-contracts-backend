@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"errors"
 	"github.com/vadim-rm/bmstu-web-backend/internal/domain"
 	"github.com/vadim-rm/bmstu-web-backend/internal/repository/entity"
 	"gorm.io/gorm"
@@ -28,6 +29,20 @@ func (r *UserImpl) Create(ctx context.Context, input CreateUserInput) (domain.Us
 	}
 
 	return domain.UserId(user.ID), nil
+}
+
+func (r *UserImpl) Get(ctx context.Context, email string) (domain.User, error) {
+	var user entity.User
+
+	err := r.db.WithContext(ctx).Where(entity.User{Email: email}).First(&user).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return domain.User{}, domain.ErrNotFound
+		}
+		return domain.User{}, err
+	}
+
+	return user.ToDomain(), nil
 }
 
 func (r *UserImpl) Update(ctx context.Context, id domain.UserId, input UpdateUserInput) error {

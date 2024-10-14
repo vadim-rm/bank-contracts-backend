@@ -19,13 +19,17 @@ func NewAccountImpl(db *gorm.DB) *AccountImpl {
 	}
 }
 
-func (r *AccountImpl) GetList(ctx context.Context, id domain.UserId, filter dto.AccountsFilter) ([]domain.Account, error) {
+func (r *AccountImpl) GetList(ctx context.Context, filter GetListInput) ([]domain.Account, error) {
 	var dbAccounts []entity.Account
 
 	query := r.db.WithContext(ctx).Where(
-		"(creator = ? OR moderator = ?) AND status != ? AND status != ?", id, id,
+		"status != ? AND status != ?",
 		domain.AccountStatusDeleted, domain.AccountStatusDraft,
 	)
+
+	if filter.CreatorId != nil {
+		query = query.Where("creator = ? OR moderator = ?", *filter.CreatorId, *filter.CreatorId)
+	}
 
 	if filter.Status != nil {
 		query = query.Where(map[string]any{
@@ -157,8 +161,9 @@ func (r *AccountImpl) GetCurrentDraft(ctx context.Context, userId domain.UserId)
 	}
 
 	return dto.Account{
-		Id:    domain.AccountId(account.ID),
-		Count: int(count),
+		Id:      domain.AccountId(account.ID),
+		Count:   int(count),
+		Creator: domain.UserId(account.Creator),
 	}, nil
 }
 

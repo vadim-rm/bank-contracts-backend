@@ -7,6 +7,7 @@ import (
 
 type User interface {
 	Create(ctx context.Context, input CreateUserInput) (domain.UserId, error)
+	Get(ctx context.Context, email string) (domain.User, error)
 	Update(ctx context.Context, id domain.UserId, input UpdateUserInput) error
 }
 

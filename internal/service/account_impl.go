@@ -20,15 +20,57 @@ func NewAccountImpl(repository repository.Account) *AccountImpl {
 	}
 }
 
-func (s *AccountImpl) GetList(ctx context.Context, id domain.UserId, filter dto.AccountsFilter) ([]domain.Account, error) {
-	return s.repository.GetList(ctx, id, filter)
+func (s *AccountImpl) GetList(ctx context.Context, filter dto.AccountsFilter) ([]domain.Account, error) {
+	claims, err := auth.GetClaims(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("error getting claims: %w", err)
+	}
+
+	accountsFilter := repository.GetListInput{
+		From:   filter.From,
+		Status: filter.Status,
+	}
+
+	if !claims.IsModerator {
+		accountsFilter.CreatorId = &claims.UserId
+	}
+
+	return s.repository.GetList(ctx, accountsFilter)
 }
 
 func (s *AccountImpl) Get(ctx context.Context, id domain.AccountId) (domain.Account, error) {
-	return s.repository.Get(ctx, id)
+	claims, err := auth.GetClaims(ctx)
+	if err != nil {
+		return domain.Account{}, fmt.Errorf("error getting claims: %w", err)
+	}
+
+	account, err := s.repository.Get(ctx, id)
+	if err != nil {
+		return domain.Account{}, err
+	}
+
+	if account.Creator != claims.UserId && !claims.IsModerator {
+		return domain.Account{}, domain.ErrActionNotPermitted
+	}
+
+	return account, nil
 }
 
 func (s *AccountImpl) Update(ctx context.Context, id domain.AccountId, input UpdateAccountInput) error {
+	claims, err := auth.GetClaims(ctx)
+	if err != nil {
+		return fmt.Errorf("error getting claims: %w", err)
+	}
+
+	account, err := s.repository.Get(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	if account.Creator != claims.UserId {
+		return domain.ErrActionNotPermitted
+	}
+
 	return s.repository.Update(ctx, id, repository.UpdateAccountInput{
 		Number: &input.Number,
 	})
@@ -38,6 +80,15 @@ func (s *AccountImpl) Submit(ctx context.Context, id domain.AccountId) error {
 	account, err := s.repository.Get(ctx, id)
 	if err != nil {
 		return fmt.Errorf("error loading account: %w", err)
+	}
+
+	claims, err := auth.GetClaims(ctx)
+	if err != nil {
+		return fmt.Errorf("error getting claims: %w", err)
+	}
+
+	if account.Creator != claims.UserId {
+		return domain.ErrActionNotPermitted
 	}
 
 	if account.Number == nil {
@@ -52,8 +103,6 @@ func (s *AccountImpl) Submit(ctx context.Context, id domain.AccountId) error {
 	for _, contract := range account.Contracts {
 		totalFee += contract.Fee
 	}
-
-	fmt.Println(totalFee)
 
 	status := domain.AccountStatusApplied
 
@@ -71,19 +120,19 @@ func (s *AccountImpl) Complete(ctx context.Context, id domain.AccountId, status 
 		return fmt.Errorf("error getting account: %w", err)
 	}
 
-	user := auth.GetModerator()
-	if !user.IsModerator {
-		return domain.ErrActionNotPermitted
-	}
-
 	if !(account.Status == domain.AccountStatusApplied &&
 		(status == domain.AccountStatusRejected || status == domain.AccountStatusFinalized)) {
 		return domain.ErrInvalidTargetStatus
 	}
 
+	claims, err := auth.GetClaims(ctx)
+	if err != nil {
+		return fmt.Errorf("error getting claims: %w", err)
+	}
+
 	now := time.Now()
 	return s.repository.Update(ctx, id, repository.UpdateAccountInput{
-		Moderator:  &user.ID,
+		Moderator:  &claims.UserId,
 		FinishedAt: &now,
 		Status:     &status,
 	})

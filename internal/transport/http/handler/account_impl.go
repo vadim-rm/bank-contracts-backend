@@ -3,7 +3,6 @@ package handler
 import (
 	"errors"
 	"github.com/gin-gonic/gin"
-	"github.com/vadim-rm/bmstu-web-backend/internal/auth"
 	"github.com/vadim-rm/bmstu-web-backend/internal/domain"
 	"github.com/vadim-rm/bmstu-web-backend/internal/dto"
 	"github.com/vadim-rm/bmstu-web-backend/internal/service"
@@ -52,9 +51,7 @@ func (h *AccountImpl) GetList(ctx *gin.Context) {
 		return
 	}
 
-	user := auth.GetUser()
-
-	accounts, err := h.service.GetList(ctx, user.ID, dto.AccountsFilter{
+	accounts, err := h.service.GetList(ctx, dto.AccountsFilter{
 		From:   request.From,
 		Status: (*domain.AccountStatus)(request.Status),
 	})

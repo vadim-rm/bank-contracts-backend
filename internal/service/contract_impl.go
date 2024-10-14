@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/vadim-rm/bmstu-web-backend/internal/auth"
 	"github.com/vadim-rm/bmstu-web-backend/internal/domain"
 	"github.com/vadim-rm/bmstu-web-backend/internal/dto"
 	"github.com/vadim-rm/bmstu-web-backend/internal/repository"
@@ -65,6 +66,14 @@ func (s *ContractImpl) AddToCurrentDraft(ctx context.Context, id domain.Contract
 		return fmt.Errorf("error retrieving account: %w", err)
 	}
 
+	claims, err := auth.GetClaims(ctx)
+	if err != nil {
+		return fmt.Errorf("error getting claims: %w", err)
+	}
+	if account.Creator != claims.UserId {
+		return domain.ErrActionNotPermitted
+	}
+
 	err = s.contractRepository.AddToAccount(ctx, repository.AddToAccountInput{
 		AccountId:  account.Id,
 		ContractId: id,
@@ -80,10 +89,15 @@ func (s *ContractImpl) getOrCreateAccount(ctx context.Context) (dto.Account, err
 	draft, err := s.accountRepository.GetCurrentDraft(ctx, 0)
 	if err != nil {
 		if errors.Is(err, domain.ErrNotFound) {
+			claims, err := auth.GetClaims(ctx)
+			if err != nil {
+				return dto.Account{}, fmt.Errorf("error getting claims: %w", err)
+			}
+
 			accountId, err := s.accountRepository.Create(ctx, repository.CreateAccountInput{
 				CreatedAt: time.Now(),
 				Status:    domain.AccountStatusDraft,
-				Creator:   0,
+				Creator:   claims.UserId,
 			})
 			if err != nil {
 				return dto.Account{}, fmt.Errorf("error creating new draft account: %w", err)

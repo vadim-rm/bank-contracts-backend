@@ -7,7 +7,7 @@ import (
 )
 
 type Account interface {
-	GetList(ctx context.Context, id domain.UserId, filter dto.AccountsFilter) ([]domain.Account, error)
+	GetList(ctx context.Context, filter dto.AccountsFilter) ([]domain.Account, error)
 	Get(ctx context.Context, id domain.AccountId) (domain.Account, error)
 	Update(ctx context.Context, id domain.AccountId, input UpdateAccountInput) error
 	Submit(ctx context.Context, id domain.AccountId) error

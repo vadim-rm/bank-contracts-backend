@@ -21,6 +21,10 @@ func newErrorResponse(ctx *gin.Context, err error) {
 		code = http.StatusBadRequest
 	} else if errors.Is(err, domain.ErrBadRequest) {
 		code = http.StatusBadRequest
+	} else if errors.Is(err, domain.ErrInvalidCredentials) {
+		code = http.StatusUnauthorized
+	} else if errors.Is(err, domain.ErrUnauthenticated) {
+		code = http.StatusUnauthorized
 	}
 
 	ctx.AbortWithStatusJSON(

@@ -77,8 +77,13 @@ func (h *ContractImpl) GetList(ctx *gin.Context) {
 	}
 
 	response := getListOfContractsResponse{Contracts: contractsResponse}
-	user := auth.GetUser()
-	account, err := h.accountService.GetCurrentDraft(ctx, user.ID)
+	claims, err := auth.GetClaims(ctx)
+	if err != nil {
+		newErrorResponse(ctx, err)
+		return
+	}
+
+	account, err := h.accountService.GetCurrentDraft(ctx, claims.UserId)
 	if err != nil && !errors.Is(err, domain.ErrNotFound) {
 		newErrorResponse(ctx, err)
 		return

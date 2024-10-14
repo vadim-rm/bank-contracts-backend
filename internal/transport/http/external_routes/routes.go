@@ -3,10 +3,12 @@ package external_routes
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/vadim-rm/bmstu-web-backend/internal/transport/http/handler"
+	"github.com/vadim-rm/bmstu-web-backend/internal/transport/http/middleware"
 )
 
 func Initialize(
 	parent *gin.Engine,
+	authMiddleware *middleware.AuthMiddleware,
 	contractHandler handler.Contract,
 	accountHandler handler.Account,
 	accountContractsHandler handler.AccountContracts,
@@ -14,46 +16,62 @@ func Initialize(
 ) {
 	contracts := parent.Group("contracts")
 	{
-		initializeContracts(contracts, contractHandler)
+		initializeContracts(contracts, authMiddleware, contractHandler)
 	}
 
 	accounts := parent.Group("accounts")
 	{
-		initializeAccounts(accounts, accountHandler)
+		initializeAccounts(accounts, authMiddleware, accountHandler)
 	}
 
 	users := parent.Group("users")
 	{
-		initializeUsers(users, usersHandler)
+		initializeUsers(users, authMiddleware, usersHandler)
 	}
-	initializeAccountContracts(parent, accountContractsHandler)
+	initializeAccountContracts(parent, authMiddleware, accountContractsHandler)
 }
 
-func initializeContracts(parent *gin.RouterGroup, contractHandler handler.Contract) {
+func initializeContracts(parent *gin.RouterGroup, authMiddleware *middleware.AuthMiddleware, contractHandler handler.Contract) {
 	parent.GET("", contractHandler.GetList)
 	parent.GET(":id", contractHandler.Get)
-	parent.POST("", contractHandler.Create)
-	parent.PUT(":id", contractHandler.Update)
-	parent.DELETE(":id", contractHandler.Delete)
-	parent.POST(":id/draft", contractHandler.AddToAccount)
-	parent.PUT(":id/image", contractHandler.UpdateImage)
+	moderator := parent.Use(authMiddleware.WithAuth, authMiddleware.WithModerator)
+	{
+		moderator.POST("", contractHandler.Create)
+		moderator.PUT(":id", contractHandler.Update)
+		moderator.DELETE(":id", contractHandler.Delete)
+		moderator.POST(":id/draft", contractHandler.AddToAccount)
+		moderator.PUT(":id/image", contractHandler.UpdateImage)
+	}
 }
 
-func initializeAccounts(parent *gin.RouterGroup, accountsHandler handler.Account) {
-	parent.GET("", accountsHandler.GetList)
-	parent.GET(":accountId", accountsHandler.Get)
-	parent.PUT(":accountId", accountsHandler.Update)
-	parent.PUT(":accountId/submit", accountsHandler.Submit)
-	parent.PUT(":accountId/complete", accountsHandler.Complete)
-	parent.DELETE(":accountId", accountsHandler.Delete)
+func initializeAccounts(parent *gin.RouterGroup, authMiddleware *middleware.AuthMiddleware, accountsHandler handler.Account) {
+	authorized := parent.Use(authMiddleware.WithAuth)
+	{
+		authorized.GET("", accountsHandler.GetList)
+		authorized.GET(":accountId", accountsHandler.Get)
+		authorized.PUT(":accountId", accountsHandler.Update)
+		authorized.PUT(":accountId/submit", accountsHandler.Submit)
+		authorized.DELETE(":accountId", accountsHandler.Delete)
+
+		authorized.Use(authMiddleware.WithModerator).PUT(":accountId/complete", accountsHandler.Complete)
+	}
 }
 
-func initializeAccountContracts(parent *gin.Engine, accountContractsHandler handler.AccountContracts) {
-	parent.DELETE("/accounts/:accountId/contract/:contractId", accountContractsHandler.Delete)
-	parent.PUT("/accounts/:accountId/contract/:contractId/main", accountContractsHandler.SetMain)
+func initializeAccountContracts(parent *gin.Engine, authMiddleware *middleware.AuthMiddleware, accountContractsHandler handler.AccountContracts) {
+	authorized := parent.Use(authMiddleware.WithAuth)
+	{
+		authorized.DELETE("/accounts/:accountId/contract/:contractId", accountContractsHandler.Delete)
+		authorized.PUT("/accounts/:accountId/contract/:contractId/main", accountContractsHandler.SetMain)
+	}
 }
 
-func initializeUsers(parent *gin.RouterGroup, usersHandler handler.User) {
+func initializeUsers(parent *gin.RouterGroup, authMiddleware *middleware.AuthMiddleware, usersHandler handler.User) {
 	parent.POST("", usersHandler.Create)
-	parent.PUT("", usersHandler.Update)
+	parent.POST("login", usersHandler.Authenticate)
+
+	authorized := parent.Use(authMiddleware.WithAuth)
+	{
+		authorized.PUT("", usersHandler.Update)
+		authorized.POST("logout", usersHandler.Logout)
+	}
 }

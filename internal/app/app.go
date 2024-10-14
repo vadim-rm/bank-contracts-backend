@@ -12,8 +12,10 @@ import (
 	"github.com/vadim-rm/bmstu-web-backend/internal/service"
 	"github.com/vadim-rm/bmstu-web-backend/internal/transport/http/external_routes"
 	"github.com/vadim-rm/bmstu-web-backend/internal/transport/http/handler"
+	"github.com/vadim-rm/bmstu-web-backend/internal/transport/http/middleware"
 	"github.com/vadim-rm/bmstu-web-backend/internal/transport/http/router"
 	"github.com/vadim-rm/bmstu-web-backend/pkg/logger"
+	"github.com/vadim-rm/bmstu-web-backend/pkg/redis"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"log"
@@ -27,7 +29,7 @@ import (
 func Run() {
 	cfg, err := config.Load()
 	if err != nil {
-		logger.Fatalf("error loading config: %w", err)
+		logger.Fatalf("error loading config: %s", err.Error())
 	}
 
 	db, err := gorm.Open(
@@ -36,7 +38,17 @@ func Run() {
 				cfg.Postgres.Host, cfg.Postgres.User, cfg.Postgres.Password, cfg.Postgres.DbName, cfg.Postgres.Port)),
 		&gorm.Config{})
 	if err != nil {
-		panic("failed to connect database")
+		logger.Fatalf("error connecting to postgres: %s", err.Error())
+	}
+
+	redisClient, err := redis.New(redis.Config{
+		Host:     cfg.Redis.Host,
+		Port:     cfg.Redis.Port,
+		User:     cfg.Redis.User,
+		Password: cfg.Redis.Password,
+	})
+	if err != nil {
+		logger.Fatalf("error connecting to redis: %s", err.Error())
 	}
 
 	err = db.SetupJoinTable(&entity.Account{}, "Contracts", &entity.AccountContracts{})
@@ -64,6 +76,15 @@ func Run() {
 	accountRepository := repository.NewAccountImpl(db)
 	accountContractsRepository := repository.NewAccountContractsImpl(db)
 	usersRepository := repository.NewUserImpl(db)
+	tokenRepository := repository.NewTokenImpl(
+		repository.TokenConfig{
+			ExpiresIn: cfg.Jwt.ExpiresIn,
+			Token:     cfg.Jwt.Token,
+			Issuer:    cfg.Jwt.Issuer,
+		},
+		redisClient,
+	)
+
 	imageRepository := repository.NewImageImpl(minioClient, repository.ImageConfig{
 		BucketName: cfg.Minio.BucketName,
 		BaseUrl:    cfg.Minio.BaseUrl,
@@ -72,7 +93,7 @@ func Run() {
 	contractService := service.NewContractImpl(contractRepository, accountRepository, imageRepository)
 	accountService := service.NewAccountImpl(accountRepository)
 	accountContractsService := service.NewAccountContractsImpl(accountContractsRepository, accountRepository)
-	usersService := service.NewUserImpl(usersRepository)
+	usersService := service.NewUserImpl(usersRepository, tokenRepository)
 
 	accountHandler := handler.NewAccountImpl(accountService)
 	contractHandler := handler.NewContractImpl(contractService, accountService)
@@ -83,7 +104,12 @@ func Run() {
 		DebugCors: cfg.App.Debug,
 	})
 
-	external_routes.Initialize(engine, contractHandler, accountHandler, accountContractsHandler, usersHandler)
+	authMiddleware := middleware.NewAuthMiddleware(tokenRepository)
+
+	external_routes.Initialize(engine,
+		authMiddleware,
+		contractHandler, accountHandler, accountContractsHandler, usersHandler,
+	)
 
 	srv := &http.Server{
 		Addr:    fmt.Sprintf("%s:%d", cfg.Http.Host, cfg.Http.Port),

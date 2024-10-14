@@ -1,25 +1,20 @@
 package auth
 
 import (
+	"context"
+	"github.com/vadim-rm/bmstu-web-backend/internal/domain"
 	"github.com/vadim-rm/bmstu-web-backend/internal/dto"
 )
 
-var user = dto.User{
-	ID:          0,
-	Email:       "mockemail@example.com",
-	IsModerator: true,
-}
+const tokenClaims = "tokenClaims"
 
-func GetUser() dto.User {
-	return user
-}
+func GetClaims(ctx context.Context) (dto.TokenClaims, error) {
+	rawClaims := ctx.Value(tokenClaims)
 
-var moderator = dto.User{
-	ID:          1,
-	Email:       "mockemailmoderator@example.com",
-	IsModerator: true,
-}
+	claims, ok := rawClaims.(dto.TokenClaims)
+	if !ok {
+		return dto.TokenClaims{}, domain.ErrActionNotPermitted
+	}
 
-func GetModerator() dto.User {
-	return moderator
+	return claims, nil
 }
