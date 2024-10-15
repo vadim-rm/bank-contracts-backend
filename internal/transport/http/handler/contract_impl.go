@@ -282,7 +282,7 @@ type addToAccountRequest struct {
 // AddToAccount
 // @Summary Добавление договора в заявку на счёт
 // @Description Добавляет существующий договор в текущую заявку на счёт по его ID.
-// @Tags account-contracts
+// @Tags contracts
 // @Accept  json
 // @Produce  json
 // @Param id path int true "ID договора"

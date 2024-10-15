@@ -681,7 +681,7 @@ paths:
       - Bearer: []
       summary: Добавление договора в заявку на счёт
       tags:
-      - account-contracts
+      - contracts
   /contracts/{id}/image:
     put:
       consumes:

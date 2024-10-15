@@ -22,6 +22,24 @@ func NewAuthMiddleware(repository repository.Token) *AuthMiddleware {
 	}
 }
 
+func (a *AuthMiddleware) WithOptionalAuth(ctx *gin.Context) {
+	jwtStr := ctx.GetHeader("Authorization")
+	if !strings.HasPrefix(jwtStr, jwtPrefix) {
+		return
+	}
+
+	jwtStr = jwtStr[len(jwtPrefix):]
+
+	claims, err := a.repository.GetClaims(ctx, jwtStr)
+	if err != nil {
+		ctx.AbortWithStatus(http.StatusUnauthorized)
+		logger.Error(err)
+		return
+	}
+
+	ctx.Set(tokenClaims, claims)
+}
+
 func (a *AuthMiddleware) WithAuth(ctx *gin.Context) {
 	jwtStr := ctx.GetHeader("Authorization")
 	if !strings.HasPrefix(jwtStr, jwtPrefix) {

@@ -19,7 +19,7 @@ func Initialize(
 ) {
 	parent.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	contracts := parent.Group("contracts")
+	contracts := parent.Group("contracts", authMiddleware.WithOptionalAuth)
 	{
 		initializeContracts(contracts, authMiddleware, contractHandler)
 	}
@@ -39,12 +39,14 @@ func Initialize(
 func initializeContracts(parent *gin.RouterGroup, authMiddleware *middleware.AuthMiddleware, contractHandler handler.Contract) {
 	parent.GET("", contractHandler.GetList)
 	parent.GET(":id", contractHandler.Get)
+
+	parent.Group("", authMiddleware.WithAuth).POST(":id/draft", contractHandler.AddToAccount)
+
 	moderator := parent.Group("", authMiddleware.WithAuth, authMiddleware.WithModerator)
 	{
 		moderator.POST("", contractHandler.Create)
 		moderator.PUT(":id", contractHandler.Update)
 		moderator.DELETE(":id", contractHandler.Delete)
-		moderator.POST(":id/draft", contractHandler.AddToAccount)
 		moderator.PUT(":id/image", contractHandler.UpdateImage)
 	}
 }

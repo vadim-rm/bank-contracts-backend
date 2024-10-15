@@ -736,7 +736,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "account-contracts"
+                    "contracts"
                 ],
                 "summary": "Добавление договора в заявку на счёт",
                 "parameters": [
