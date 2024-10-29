@@ -63,5 +63,9 @@ func (s *AccountContractsImpl) SetMain(ctx context.Context, contractId domain.Co
 		return domain.ErrActionNotPermitted
 	}
 
+	if account.Status != domain.AccountStatusDraft {
+		return domain.ErrWrongAccountStatus
+	}
+
 	return s.accountContractsRepository.SetMain(ctx, contractId, accountId)
 }
