@@ -1304,7 +1304,7 @@ const docTemplate = `{
         "handler.updateUserRequest": {
             "type": "object",
             "properties": {
-                "passwordHash": {
+                "password": {
                     "type": "string"
                 }
             }

@@ -181,7 +181,7 @@ definitions:
     type: object
   handler.updateUserRequest:
     properties:
-      passwordHash:
+      password:
         type: string
     type: object
 host: localhost:8000

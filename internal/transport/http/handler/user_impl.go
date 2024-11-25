@@ -56,7 +56,7 @@ func (h *UserImpl) Create(ctx *gin.Context) {
 }
 
 type updateUserRequest struct {
-	PasswordHash *string `json:"passwordHash,omitempty"`
+	Password *string `json:"password,omitempty"`
 }
 
 // Update
@@ -87,7 +87,7 @@ func (h *UserImpl) Update(ctx *gin.Context) {
 	}
 
 	err = h.service.Update(ctx, claims.UserId, service.UpdateUserInput{
-		Password: request.PasswordHash,
+		Password: request.Password,
 	})
 	if err != nil {
 		newErrorResponse(ctx, err)
