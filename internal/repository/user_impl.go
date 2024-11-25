@@ -18,9 +18,8 @@ func NewUserImpl(db *gorm.DB) *UserImpl {
 
 func (r *UserImpl) Create(ctx context.Context, input CreateUserInput) (domain.UserId, error) {
 	user := entity.User{
-		Name:         input.Name,
+		Login:        input.Login,
 		PasswordHash: input.PasswordHash,
-		Email:        input.Email,
 	}
 
 	err := r.db.WithContext(ctx).Create(&user).Error
@@ -31,10 +30,10 @@ func (r *UserImpl) Create(ctx context.Context, input CreateUserInput) (domain.Us
 	return domain.UserId(user.ID), nil
 }
 
-func (r *UserImpl) Get(ctx context.Context, email string) (domain.User, error) {
+func (r *UserImpl) Get(ctx context.Context, login string) (domain.User, error) {
 	var user entity.User
 
-	err := r.db.WithContext(ctx).Where(entity.User{Email: email}).First(&user).Error
+	err := r.db.WithContext(ctx).Where(entity.User{Login: login}).First(&user).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return domain.User{}, domain.ErrNotFound
@@ -48,11 +47,6 @@ func (r *UserImpl) Get(ctx context.Context, email string) (domain.User, error) {
 func (r *UserImpl) Update(ctx context.Context, id domain.UserId, input UpdateUserInput) error {
 	updateColumns := make([]string, 0)
 	updateValues := make(map[string]any)
-
-	if input.Name != nil {
-		updateColumns = append(updateColumns, "Name")
-		updateValues["Name"] = *input.Name
-	}
 
 	if input.PasswordHash != nil {
 		updateColumns = append(updateColumns, "PasswordHash")

@@ -4,6 +4,7 @@ import "errors"
 
 var (
 	ErrNotFound            = errors.New("ERR_NOT_FOUND")
+	ErrPageNotFound        = errors.New("ERR_PAGE_NOT_FOUND")
 	ErrAccountNumberEmpty  = errors.New("ERR_ACCOUNT_NUMBER_EMPTY")
 	ErrInvalidTargetStatus = errors.New("ERR_INVALID_TARGET_STATUS")
 	ErrActionNotPermitted  = errors.New("ERR_ACTION_NOT_PERMITTED")

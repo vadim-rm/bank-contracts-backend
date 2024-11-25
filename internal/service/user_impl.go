@@ -28,8 +28,7 @@ func NewUserImpl(
 
 func (s *UserImpl) Create(ctx context.Context, input CreateUserInput) (domain.UserId, error) {
 	return s.user.Create(ctx, repository.CreateUserInput{
-		Name:         input.Name,
-		Email:        input.Email,
+		Login:        input.Login,
 		PasswordHash: generateHashString(input.Password),
 	})
 }
@@ -42,13 +41,12 @@ func (s *UserImpl) Update(ctx context.Context, id domain.UserId, input UpdateUse
 	}
 
 	return s.user.Update(ctx, id, repository.UpdateUserInput{
-		Name:         input.Name,
 		PasswordHash: hash,
 	})
 }
 
 func (s *UserImpl) Authenticate(ctx context.Context, input AuthorizeInput) (dto.Token, error) {
-	user, err := s.user.Get(ctx, input.Email)
+	user, err := s.user.Get(ctx, input.Login)
 	if err != nil {
 		if errors.Is(err, domain.ErrNotFound) {
 			return dto.Token{}, domain.ErrInvalidCredentials
@@ -73,6 +71,10 @@ func (s *UserImpl) Authenticate(ctx context.Context, input AuthorizeInput) (dto.
 
 func (s *UserImpl) Logout(ctx context.Context, token string) error {
 	return s.token.Blacklist(ctx, token)
+}
+
+func (s *UserImpl) Get(ctx context.Context, login string) (domain.User, error) {
+	return s.user.Get(ctx, login)
 }
 
 func generateHashString(s string) string {

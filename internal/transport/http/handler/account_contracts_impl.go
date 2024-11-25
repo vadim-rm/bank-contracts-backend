@@ -71,7 +71,7 @@ type setMainAccountContractRequest struct {
 // @Failure 404 {object} errorResponse "Заявка на счёт или договор не найдены"
 // @Failure 500 {object} errorResponse "Внутренняя ошибка сервера"
 // @Security Bearer
-// @Router /accounts/{accountId}/contract/{contractId}/main [post]
+// @Router /accounts/{accountId}/contract/{contractId}/main [put]
 func (h *AccountContractsImpl) SetMain(ctx *gin.Context) {
 	var request setMainAccountContractRequest
 

@@ -28,6 +28,7 @@ func (s *AccountImpl) GetList(ctx context.Context, filter dto.AccountsFilter) ([
 
 	accountsFilter := repository.GetListInput{
 		From:   filter.From,
+		To:     filter.To,
 		Status: filter.Status,
 	}
 

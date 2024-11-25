@@ -41,6 +41,10 @@ func (r *AccountImpl) GetList(ctx context.Context, filter GetListInput) ([]domai
 		query = query.Where("created_at >= ?", *filter.From)
 	}
 
+	if filter.To != nil {
+		query = query.Where("created_at <= ?", *filter.To)
+	}
+
 	if err := query.Find(&dbAccounts).Error; err != nil {
 		return nil, err
 	}

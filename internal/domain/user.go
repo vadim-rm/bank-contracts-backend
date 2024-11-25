@@ -4,8 +4,7 @@ type UserId uint
 
 type User struct {
 	ID           UserId
-	Name         string
-	Email        string
+	Login        string
 	PasswordHash string
 	IsModerator  bool
 }

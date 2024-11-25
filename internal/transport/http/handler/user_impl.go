@@ -20,8 +20,7 @@ func NewUserImpl(service service.User) *UserImpl {
 }
 
 type createUserRequest struct {
-	Name     string `json:"name" binding:"required"`
-	Email    string `json:"email" binding:"required,email"`
+	Login    string `json:"login" binding:"required"`
 	Password string `json:"password" binding:"required"`
 }
 
@@ -45,8 +44,7 @@ func (h *UserImpl) Create(ctx *gin.Context) {
 	}
 
 	_, err = h.service.Create(ctx, service.CreateUserInput{
-		Name:     request.Name,
-		Email:    request.Email,
+		Login:    request.Login,
 		Password: request.Password,
 	})
 	if err != nil {
@@ -58,7 +56,6 @@ func (h *UserImpl) Create(ctx *gin.Context) {
 }
 
 type updateUserRequest struct {
-	Name         *string `json:"name,omitempty"`
 	PasswordHash *string `json:"passwordHash,omitempty"`
 }
 
@@ -90,7 +87,6 @@ func (h *UserImpl) Update(ctx *gin.Context) {
 	}
 
 	err = h.service.Update(ctx, claims.UserId, service.UpdateUserInput{
-		Name:     request.Name,
 		Password: request.PasswordHash,
 	})
 	if err != nil {
@@ -102,13 +98,15 @@ func (h *UserImpl) Update(ctx *gin.Context) {
 }
 
 type authenticateUserRequest struct {
-	Email    string `json:"email" binding:"required,email"`
+	Login    string `json:"login" binding:"required"`
 	Password string `json:"password" binding:"required"`
 }
 
 type authenticateUserResponse struct {
 	ExpiresAt   time.Time `json:"expiresAt"`
 	AccessToken string    `json:"accessToken"`
+	Login       string    `json:"login"`
+	IsModerator bool      `json:"isModerator"`
 }
 
 // Authenticate
@@ -132,9 +130,15 @@ func (h *UserImpl) Authenticate(ctx *gin.Context) {
 	}
 
 	token, err := h.service.Authenticate(ctx, service.AuthorizeInput{
-		Email:    request.Email,
+		Login:    request.Login,
 		Password: request.Password,
 	})
+	if err != nil {
+		newErrorResponse(ctx, err)
+		return
+	}
+
+	user, err := h.service.Get(ctx, request.Login)
 	if err != nil {
 		newErrorResponse(ctx, err)
 		return
@@ -143,6 +147,8 @@ func (h *UserImpl) Authenticate(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, authenticateUserResponse{
 		ExpiresAt:   token.ExpiresAt,
 		AccessToken: token.Token,
+		Login:       user.Login,
+		IsModerator: user.IsModerator,
 	})
 }
 

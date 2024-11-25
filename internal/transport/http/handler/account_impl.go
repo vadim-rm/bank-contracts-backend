@@ -23,6 +23,7 @@ func NewAccountImpl(service service.Account) *AccountImpl {
 type getAccountListRequest struct {
 	Status *string    `form:"status,omitempty"`
 	From   *time.Time `form:"from,omitempty"`
+	To     *time.Time `form:"to,omitempty"`
 }
 
 type getAccountListResponse struct {
@@ -66,6 +67,7 @@ func (h *AccountImpl) GetList(ctx *gin.Context) {
 
 	accounts, err := h.service.GetList(ctx, dto.AccountsFilter{
 		From:   request.From,
+		To:     request.To,
 		Status: (*domain.AccountStatus)(request.Status),
 	})
 	if err != nil {
@@ -237,7 +239,7 @@ type submitAccountRequest struct {
 // @Failure 404 {object} errorResponse "Заявка на счёт не найдена"
 // @Failure 500 {object} errorResponse "Внутренняя ошибка сервера"
 // @Security Bearer
-// @Router /account/{accountId}/submit [post]
+// @Router /accounts/{accountId}/submit [put]
 func (h *AccountImpl) Submit(ctx *gin.Context) {
 	var request submitAccountRequest
 

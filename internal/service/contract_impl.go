@@ -103,7 +103,7 @@ func (s *ContractImpl) getOrCreateAccount(ctx context.Context) (dto.Account, err
 				return dto.Account{}, fmt.Errorf("error creating new draft account: %w", err)
 			}
 
-			return dto.Account{Id: accountId}, nil
+			return dto.Account{Id: accountId, Creator: claims.UserId}, nil
 		}
 		return dto.Account{}, fmt.Errorf("error getting draft account: %w", err)
 	}

@@ -7,5 +7,6 @@ import (
 
 type AccountsFilter struct {
 	From   *time.Time
+	To     *time.Time
 	Status *domain.AccountStatus
 }

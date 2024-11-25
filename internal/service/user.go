@@ -11,20 +11,19 @@ type User interface {
 	Update(ctx context.Context, id domain.UserId, input UpdateUserInput) error
 	Logout(ctx context.Context, token string) error
 	Authenticate(ctx context.Context, input AuthorizeInput) (dto.Token, error)
+	Get(ctx context.Context, email string) (domain.User, error)
 }
 
 type CreateUserInput struct {
-	Name     string
-	Email    string
+	Login    string
 	Password string
 }
 
 type UpdateUserInput struct {
-	Name     *string
 	Password *string
 }
 
 type AuthorizeInput struct {
-	Email    string
+	Login    string
 	Password string
 }

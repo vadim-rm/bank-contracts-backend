@@ -25,12 +25,12 @@ definitions:
     type: object
   handler.authenticateUserRequest:
     properties:
-      email:
+      login:
         type: string
       password:
         type: string
     required:
-    - email
+    - login
     - password
     type: object
   handler.authenticateUserResponse:
@@ -38,6 +38,10 @@ definitions:
       accessToken:
         type: string
       expiresAt:
+        type: string
+      isModerator:
+        type: boolean
+      login:
         type: string
     type: object
   handler.completeAccountRequest:
@@ -80,15 +84,12 @@ definitions:
     type: object
   handler.createUserRequest:
     properties:
-      email:
-        type: string
-      name:
+      login:
         type: string
       password:
         type: string
     required:
-    - email
-    - name
+    - login
     - password
     type: object
   handler.errorResponse:
@@ -180,8 +181,6 @@ definitions:
     type: object
   handler.updateUserRequest:
     properties:
-      name:
-        type: string
       passwordHash:
         type: string
     type: object
@@ -228,39 +227,6 @@ paths:
       security:
       - Bearer: []
       summary: Завершение заявки на счёт
-      tags:
-      - accounts
-  /account/{accountId}/submit:
-    post:
-      consumes:
-      - application/json
-      description: Отправляет заявку на счёт по её ID для дальнейшей обработки.
-      parameters:
-      - description: ID заявки на счёт
-        in: path
-        name: accountId
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Заявка на счёт успешно отправлена
-        "400":
-          description: Неверный запрос
-          schema:
-            $ref: '#/definitions/handler.errorResponse'
-        "404":
-          description: Заявка на счёт не найдена
-          schema:
-            $ref: '#/definitions/handler.errorResponse'
-        "500":
-          description: Внутренняя ошибка сервера
-          schema:
-            $ref: '#/definitions/handler.errorResponse'
-      security:
-      - Bearer: []
-      summary: Отправка заявки на счёт
       tags:
       - accounts
   /accounts:
@@ -443,7 +409,7 @@ paths:
       tags:
       - account-contracts
   /accounts/{accountId}/contract/{contractId}/main:
-    post:
+    put:
       consumes:
       - application/json
       description: Устанавливает указанный договор в качестве основного для заявки
@@ -481,6 +447,39 @@ paths:
       summary: Установить договор основным в заявке на счёт
       tags:
       - account-contracts
+  /accounts/{accountId}/submit:
+    put:
+      consumes:
+      - application/json
+      description: Отправляет заявку на счёт по её ID для дальнейшей обработки.
+      parameters:
+      - description: ID заявки на счёт
+        in: path
+        name: accountId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Заявка на счёт успешно отправлена
+        "400":
+          description: Неверный запрос
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "404":
+          description: Заявка на счёт не найдена
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      security:
+      - Bearer: []
+      summary: Отправка заявки на счёт
+      tags:
+      - accounts
   /contracts:
     get:
       consumes:

@@ -76,58 +76,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/account/{accountId}/submit": {
-            "post": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "description": "Отправляет заявку на счёт по её ID для дальнейшей обработки.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "accounts"
-                ],
-                "summary": "Отправка заявки на счёт",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "ID заявки на счёт",
-                        "name": "accountId",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Заявка на счёт успешно отправлена"
-                    },
-                    "400": {
-                        "description": "Неверный запрос",
-                        "schema": {
-                            "$ref": "#/definitions/handler.errorResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Заявка на счёт не найдена",
-                        "schema": {
-                            "$ref": "#/definitions/handler.errorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Внутренняя ошибка сервера",
-                        "schema": {
-                            "$ref": "#/definitions/handler.errorResponse"
-                        }
-                    }
-                }
-            }
-        },
         "/accounts": {
             "get": {
                 "security": [
@@ -406,7 +354,7 @@ const docTemplate = `{
             }
         },
         "/accounts/{accountId}/contract/{contractId}/main": {
-            "post": {
+            "put": {
                 "security": [
                     {
                         "Bearer": []
@@ -451,6 +399,58 @@ const docTemplate = `{
                     },
                     "404": {
                         "description": "Заявка на счёт или договор не найдены",
+                        "schema": {
+                            "$ref": "#/definitions/handler.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "$ref": "#/definitions/handler.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/accounts/{accountId}/submit": {
+            "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Отправляет заявку на счёт по её ID для дальнейшей обработки.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "accounts"
+                ],
+                "summary": "Отправка заявки на счёт",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID заявки на счёт",
+                        "name": "accountId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Заявка на счёт успешно отправлена"
+                    },
+                    "400": {
+                        "description": "Неверный запрос",
+                        "schema": {
+                            "$ref": "#/definitions/handler.errorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Заявка на счёт не найдена",
                         "schema": {
                             "$ref": "#/definitions/handler.errorResponse"
                         }
@@ -1064,11 +1064,11 @@ const docTemplate = `{
         "handler.authenticateUserRequest": {
             "type": "object",
             "required": [
-                "email",
+                "login",
                 "password"
             ],
             "properties": {
-                "email": {
+                "login": {
                     "type": "string"
                 },
                 "password": {
@@ -1083,6 +1083,12 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "expiresAt": {
+                    "type": "string"
+                },
+                "isModerator": {
+                    "type": "boolean"
+                },
+                "login": {
                     "type": "string"
                 }
             }
@@ -1149,15 +1155,11 @@ const docTemplate = `{
         "handler.createUserRequest": {
             "type": "object",
             "required": [
-                "email",
-                "name",
+                "login",
                 "password"
             ],
             "properties": {
-                "email": {
-                    "type": "string"
-                },
-                "name": {
+                "login": {
                     "type": "string"
                 },
                 "password": {
@@ -1302,9 +1304,6 @@ const docTemplate = `{
         "handler.updateUserRequest": {
             "type": "object",
             "properties": {
-                "name": {
-                    "type": "string"
-                },
                 "passwordHash": {
                     "type": "string"
                 }

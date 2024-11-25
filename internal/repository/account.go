@@ -19,6 +19,7 @@ type Account interface {
 type GetListInput struct {
 	CreatorId *domain.UserId
 	From      *time.Time
+	To        *time.Time
 	Status    *domain.AccountStatus
 }
 

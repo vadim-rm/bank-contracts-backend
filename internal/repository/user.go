@@ -12,12 +12,10 @@ type User interface {
 }
 
 type CreateUserInput struct {
-	Name         string
-	Email        string
+	Login        string
 	PasswordHash string
 }
 
 type UpdateUserInput struct {
-	Name         *string
 	PasswordHash *string
 }

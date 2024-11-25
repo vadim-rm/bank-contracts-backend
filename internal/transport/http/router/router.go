@@ -22,7 +22,7 @@ func New(config Config) *gin.Engine {
 		c.JSON(
 			http.StatusNotFound,
 			gin.H{
-				"error": domain.ErrNotFound.Error(),
+				"error": domain.ErrPageNotFound.Error(),
 			},
 		)
 	})
