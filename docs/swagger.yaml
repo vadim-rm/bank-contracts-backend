@@ -244,6 +244,10 @@ paths:
         in: query
         name: from
         type: string
+      - description: Фильтр по дате
+        in: query
+        name: to
+        type: string
       produces:
       - application/json
       responses:
@@ -352,7 +356,9 @@ paths:
       - application/json
       responses:
         "200":
-          description: Заявка на счёт успешно обновлена
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.getAccountResponse'
         "400":
           description: Неверный запрос
           schema:
@@ -462,7 +468,9 @@ paths:
       - application/json
       responses:
         "200":
-          description: Заявка на счёт успешно отправлена
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.getAccountResponse'
         "400":
           description: Неверный запрос
           schema:

@@ -25,8 +25,10 @@ type Account struct {
 	Status      AccountStatus
 	Number      *AccountNumber
 
-	Creator   UserId
-	Moderator *UserId
+	Creator       UserId
+	Moderator     *UserId
+	CreatorUser   User
+	ModeratorUser *User
 
 	TotalFee *int32
 

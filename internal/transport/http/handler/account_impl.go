@@ -39,8 +39,8 @@ type getAccountsListAccount struct {
 	Status      string     `json:"status"`
 	Number      *string    `json:"number"`
 
-	Creator   domain.UserId  `json:"creator"`
-	Moderator *domain.UserId `json:"moderator"`
+	Creator   string  `json:"creator"`
+	Moderator *string `json:"moderator"`
 
 	TotalFee *int32 `json:"totalFee"`
 }
@@ -53,6 +53,7 @@ type getAccountsListAccount struct {
 // @Produce  json
 // @Param status query string false "Фильтр по статуса"
 // @Param from query string false "Фильтр по дате"
+// @Param to query string false "Фильтр по дате"
 // @Success 200 {object} getAccountListResponse "Список заявок на счёт"
 // @Failure 400 {object} errorResponse "Неверный запрос"
 // @Failure 500 {object} errorResponse "Внутренняя ошибка сервера"
@@ -77,17 +78,22 @@ func (h *AccountImpl) GetList(ctx *gin.Context) {
 
 	response := make([]getAccountsListAccount, 0, len(accounts))
 	for _, account := range accounts {
-		response = append(response, getAccountsListAccount{
+		accountResponse := getAccountsListAccount{
 			Id:          int(account.Id),
 			CreatedAt:   account.CreatedAt,
 			RequestedAt: account.RequestedAt,
 			FinishedAt:  account.FinishedAt,
 			Status:      string(account.Status),
 			Number:      (*string)(account.Number),
-			Creator:     account.Creator,
-			Moderator:   account.Moderator,
-			TotalFee:    account.TotalFee,
-		})
+			Creator:     account.CreatorUser.Login,
+
+			TotalFee: account.TotalFee,
+		}
+
+		if account.ModeratorUser != nil {
+			accountResponse.Moderator = &account.ModeratorUser.Login
+		}
+		response = append(response, accountResponse)
 	}
 
 	ctx.JSON(http.StatusOK, getAccountListResponse{
@@ -102,14 +108,14 @@ type getAccountRequest struct {
 type getAccountResponse struct {
 	Id int `json:"id"`
 
-	CreatedAt   time.Time             `json:"createdAt"`
-	RequestedAt *time.Time            `json:"requestedAt"`
-	FinishedAt  *time.Time            `json:"finishedAt"`
-	Status      string                `json:"status"`
-	Number      *domain.AccountNumber `json:"number"`
+	CreatedAt   time.Time  `json:"createdAt"`
+	RequestedAt *time.Time `json:"requestedAt"`
+	FinishedAt  *time.Time `json:"finishedAt"`
+	Status      string     `json:"status"`
+	Number      *string    `json:"number"`
 
-	Creator   domain.UserId  `json:"creator"`
-	Moderator *domain.UserId `json:"moderator"`
+	Creator   string  `json:"creator"`
+	Moderator *string `json:"moderator"`
 
 	TotalFee *int32 `json:"totalFee"`
 
@@ -166,18 +172,24 @@ func (h *AccountImpl) Get(ctx *gin.Context) {
 		})
 	}
 
-	ctx.JSON(http.StatusOK, getAccountResponse{
+	accountResponse := getAccountResponse{
 		Id:          int(account.Id),
 		CreatedAt:   account.CreatedAt,
 		RequestedAt: account.RequestedAt,
 		FinishedAt:  account.FinishedAt,
 		Status:      string(account.Status),
-		Number:      account.Number,
-		Creator:     account.Creator,
-		Moderator:   account.Moderator,
+		Number:      (*string)(account.Number),
+		Creator:     account.CreatorUser.Login,
 		Contracts:   contracts,
-		TotalFee:    account.TotalFee,
-	})
+
+		TotalFee: account.TotalFee,
+	}
+
+	if account.ModeratorUser != nil {
+		accountResponse.Moderator = &account.ModeratorUser.Login
+	}
+
+	ctx.JSON(http.StatusOK, accountResponse)
 }
 
 type updateAccountRequest struct {
@@ -193,7 +205,7 @@ type updateAccountRequest struct {
 // @Produce  json
 // @Param accountId path int true "ID заявки на счёт"
 // @Param request body updateAccountRequest true "Данные для обновления заявки"
-// @Success 200 "Заявка на счёт успешно обновлена"
+// @Success 200 {object} getAccountResponse
 // @Failure 400 {object} errorResponse "Неверный запрос"
 // @Failure 404 {object} errorResponse "Заявка на счёт не найдена"
 // @Failure 500 {object} errorResponse "Внутренняя ошибка сервера"
@@ -220,7 +232,42 @@ func (h *AccountImpl) Update(ctx *gin.Context) {
 		return
 	}
 
-	ctx.Status(http.StatusOK)
+	account, err := h.service.Get(ctx, domain.AccountId(request.Id))
+	if err != nil {
+		newErrorResponse(ctx, errors.Join(domain.ErrBadRequest, err))
+		return
+	}
+
+	contracts := make([]accountContractResponse, 0, len(account.Contracts))
+	for _, contract := range account.Contracts {
+		contracts = append(contracts, accountContractResponse{
+			Id:          int(contract.Id),
+			Name:        contract.Name,
+			Fee:         contract.Fee,
+			Description: contract.Description,
+			ImageUrl:    contract.ImageUrl,
+			Type:        string(contract.Type),
+			IsMain:      contract.IsMain,
+		})
+	}
+
+	accountResponse := getAccountsListAccount{
+		Id:          int(account.Id),
+		CreatedAt:   account.CreatedAt,
+		RequestedAt: account.RequestedAt,
+		FinishedAt:  account.FinishedAt,
+		Status:      string(account.Status),
+		Number:      (*string)(account.Number),
+		Creator:     account.CreatorUser.Login,
+
+		TotalFee: account.TotalFee,
+	}
+
+	if account.ModeratorUser != nil {
+		accountResponse.Moderator = &account.ModeratorUser.Login
+	}
+
+	ctx.JSON(http.StatusOK, accountResponse)
 }
 
 type submitAccountRequest struct {
@@ -234,7 +281,7 @@ type submitAccountRequest struct {
 // @Accept  json
 // @Produce  json
 // @Param accountId path int true "ID заявки на счёт"
-// @Success 200 "Заявка на счёт успешно отправлена"
+// @Success 200 {object} getAccountResponse
 // @Failure 400 {object} errorResponse "Неверный запрос"
 // @Failure 404 {object} errorResponse "Заявка на счёт не найдена"
 // @Failure 500 {object} errorResponse "Внутренняя ошибка сервера"
@@ -254,7 +301,42 @@ func (h *AccountImpl) Submit(ctx *gin.Context) {
 		return
 	}
 
-	ctx.Status(http.StatusOK)
+	account, err := h.service.Get(ctx, domain.AccountId(request.Id))
+	if err != nil {
+		newErrorResponse(ctx, errors.Join(domain.ErrBadRequest, err))
+		return
+	}
+
+	contracts := make([]accountContractResponse, 0, len(account.Contracts))
+	for _, contract := range account.Contracts {
+		contracts = append(contracts, accountContractResponse{
+			Id:          int(contract.Id),
+			Name:        contract.Name,
+			Fee:         contract.Fee,
+			Description: contract.Description,
+			ImageUrl:    contract.ImageUrl,
+			Type:        string(contract.Type),
+			IsMain:      contract.IsMain,
+		})
+	}
+
+	accountResponse := getAccountsListAccount{
+		Id:          int(account.Id),
+		CreatedAt:   account.CreatedAt,
+		RequestedAt: account.RequestedAt,
+		FinishedAt:  account.FinishedAt,
+		Status:      string(account.Status),
+		Number:      (*string)(account.Number),
+		Creator:     account.CreatorUser.Login,
+
+		TotalFee: account.TotalFee,
+	}
+
+	if account.ModeratorUser != nil {
+		accountResponse.Moderator = &account.ModeratorUser.Login
+	}
+
+	ctx.JSON(http.StatusOK, accountResponse)
 }
 
 type completeAccountRequest struct {

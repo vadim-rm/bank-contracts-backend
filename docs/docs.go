@@ -106,6 +106,12 @@ const docTemplate = `{
                         "description": "Фильтр по дате",
                         "name": "from",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Фильтр по дате",
+                        "name": "to",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -221,7 +227,10 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Заявка на счёт успешно обновлена"
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handler.getAccountResponse"
+                        }
                     },
                     "400": {
                         "description": "Неверный запрос",
@@ -441,7 +450,10 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Заявка на счёт успешно отправлена"
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handler.getAccountResponse"
+                        }
                     },
                     "400": {
                         "description": "Неверный запрос",

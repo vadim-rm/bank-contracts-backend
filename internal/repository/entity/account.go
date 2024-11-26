@@ -16,21 +16,30 @@ type Account struct {
 	Creator   uint `gorm:"not null"`
 	Moderator *uint
 
+	CreatorUser   User  `gorm:"foreignKey:Creator"`
+	ModeratorUser *User `gorm:"foreignKey:Moderator"`
+
 	TotalFee *int32
 
 	Contracts []Contract `gorm:"many2many:account_contracts"`
 }
 
 func (a Account) ToDomain() domain.Account {
-	return domain.Account{
+	account := domain.Account{
 		Id:          domain.AccountId(a.ID),
 		CreatedAt:   a.CreatedAt,
 		RequestedAt: a.RequestedAt,
 		FinishedAt:  a.FinishedAt,
 		Status:      domain.AccountStatus(a.Status),
 		Number:      (*domain.AccountNumber)(a.Number),
-		Creator:     domain.UserId(a.Creator),
-		Moderator:   (*domain.UserId)(a.Moderator),
+		CreatorUser: a.CreatorUser.ToDomain(),
 		TotalFee:    a.TotalFee,
 	}
+
+	if a.ModeratorUser != nil {
+		u := a.ModeratorUser.ToDomain()
+		account.ModeratorUser = &u
+	}
+
+	return account
 }

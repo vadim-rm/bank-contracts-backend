@@ -22,7 +22,7 @@ func NewAccountImpl(db *gorm.DB) *AccountImpl {
 func (r *AccountImpl) GetList(ctx context.Context, filter GetListInput) ([]domain.Account, error) {
 	var dbAccounts []entity.Account
 
-	query := r.db.WithContext(ctx).Where(
+	query := r.db.Preload("CreatorUser").Preload("ModeratorUser").WithContext(ctx).Where(
 		"status != ? AND status != ?",
 		domain.AccountStatusDeleted, domain.AccountStatusDraft,
 	)
@@ -86,7 +86,7 @@ type contractWithIsMain struct {
 func (r *AccountImpl) Get(ctx context.Context, id domain.AccountId) (domain.Account, error) {
 	var account entity.Account
 
-	err := r.db.WithContext(ctx).Where(entity.Account{ID: uint(id)}).
+	err := r.db.WithContext(ctx).Preload("CreatorUser").Preload("ModeratorUser").Where(entity.Account{ID: uint(id)}).
 		Where("status != ?", domain.AccountStatusDeleted).
 		First(&account).Error
 	if err != nil {
@@ -124,7 +124,7 @@ func (r *AccountImpl) Get(ctx context.Context, id domain.AccountId) (domain.Acco
 		accountContracts = append(accountContracts, accountContract)
 	}
 
-	return domain.Account{
+	domainAccount := domain.Account{
 		Id:          domain.AccountId(account.ID),
 		CreatedAt:   account.CreatedAt,
 		RequestedAt: account.RequestedAt,
@@ -132,10 +132,17 @@ func (r *AccountImpl) Get(ctx context.Context, id domain.AccountId) (domain.Acco
 		Number:      (*domain.AccountNumber)(account.Number),
 		Status:      domain.AccountStatus(account.Status),
 		Creator:     domain.UserId(account.Creator),
-		Moderator:   (*domain.UserId)(account.Moderator),
+		CreatorUser: account.CreatorUser.ToDomain(),
 		Contracts:   accountContracts,
 		TotalFee:    account.TotalFee,
-	}, nil
+	}
+
+	if account.ModeratorUser != nil {
+		u := account.ModeratorUser.ToDomain()
+		domainAccount.ModeratorUser = &u
+	}
+
+	return domainAccount, nil
 }
 
 func (r *AccountImpl) GetCurrentDraft(ctx context.Context, userId domain.UserId) (dto.Account, error) {
