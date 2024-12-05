@@ -9,6 +9,7 @@ type Contract struct {
 	Description *string `gorm:"size:80"`
 	ImageUrl    *string `gorm:"size:80"`
 	Type        string  `gorm:"size:20;not null"`
+	Deleted     bool    `gorm:"not null;default:false"`
 
 	Accounts []Account `gorm:"many2many:account_contracts"`
 }

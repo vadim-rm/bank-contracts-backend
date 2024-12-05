@@ -26,7 +26,7 @@ func (r *ContractImpl) GetList(ctx context.Context, filter dto.ContractsFilter) 
 	query := r.db.WithContext(ctx).Where(
 		"name ILIKE ?",
 		fmt.Sprintf("%%%s%%", filter.Name),
-	)
+	).Where("deleted = ?", false).Order("id DESC")
 
 	if filter.Type != nil {
 		query = query.Where(map[string]any{
@@ -119,7 +119,9 @@ func (r *ContractImpl) Update(ctx context.Context, id domain.ContractId, input U
 }
 
 func (r *ContractImpl) Delete(ctx context.Context, id domain.ContractId) error {
-	return r.db.WithContext(ctx).Delete(&entity.Contract{}, id).Error
+	return r.db.WithContext(ctx).Model(&entity.Contract{
+		ID: uint(id),
+	}).Update("deleted", true).Error
 }
 
 func (r *ContractImpl) AddToAccount(ctx context.Context, input AddToAccountInput) error {

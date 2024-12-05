@@ -15,67 +15,6 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/account/{accountId}/complete": {
-            "post": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "description": "Завершает заявку на счёт, обновляя её статус по ID заявки.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "accounts"
-                ],
-                "summary": "Завершение заявки на счёт",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "ID заявки на счёт",
-                        "name": "accountId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Данные для завершения заявки",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/handler.completeAccountRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Заявка на счёт успешно завершена"
-                    },
-                    "400": {
-                        "description": "Неверный запрос",
-                        "schema": {
-                            "$ref": "#/definitions/handler.errorResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Заявка на счёт не найдена",
-                        "schema": {
-                            "$ref": "#/definitions/handler.errorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Внутренняя ошибка сервера",
-                        "schema": {
-                            "$ref": "#/definitions/handler.errorResponse"
-                        }
-                    }
-                }
-            }
-        },
         "/accounts": {
             "get": {
                 "security": [
@@ -281,6 +220,67 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "Заявка на счёт успешно удалена"
+                    },
+                    "400": {
+                        "description": "Неверный запрос",
+                        "schema": {
+                            "$ref": "#/definitions/handler.errorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Заявка на счёт не найдена",
+                        "schema": {
+                            "$ref": "#/definitions/handler.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "$ref": "#/definitions/handler.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/accounts/{accountId}/complete": {
+            "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Завершает заявку на счёт, обновляя её статус по ID заявки.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "accounts"
+                ],
+                "summary": "Завершение заявки на счёт",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID заявки на счёт",
+                        "name": "accountId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Данные для завершения заявки",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handler.completeAccountRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Заявка на счёт успешно завершена"
                     },
                     "400": {
                         "description": "Неверный запрос",
@@ -660,7 +660,10 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Договор успешно обновлен"
+                        "description": "Договор успешно обновлен",
+                        "schema": {
+                            "$ref": "#/definitions/handler.contractResponse"
+                        }
                     },
                     "400": {
                         "description": "Неверный запрос",
@@ -821,7 +824,10 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Изображение успешно обновлено"
+                        "description": "Изображение успешно обновлено",
+                        "schema": {
+                            "$ref": "#/definitions/handler.contractResponse"
+                        }
                     },
                     "400": {
                         "description": "Неверный запрос",
@@ -1211,7 +1217,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "creator": {
-                    "type": "integer"
+                    "type": "string"
                 },
                 "finishedAt": {
                     "type": "string"
@@ -1220,7 +1226,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "moderator": {
-                    "type": "integer"
+                    "type": "string"
                 },
                 "number": {
                     "type": "string"
@@ -1243,7 +1249,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "creator": {
-                    "type": "integer"
+                    "type": "string"
                 },
                 "finishedAt": {
                     "type": "string"
@@ -1252,7 +1258,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "moderator": {
-                    "type": "integer"
+                    "type": "string"
                 },
                 "number": {
                     "type": "string"

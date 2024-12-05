@@ -25,7 +25,7 @@ func (r *AccountImpl) GetList(ctx context.Context, filter GetListInput) ([]domai
 	query := r.db.Preload("CreatorUser").Preload("ModeratorUser").WithContext(ctx).Where(
 		"status != ? AND status != ?",
 		domain.AccountStatusDeleted, domain.AccountStatusDraft,
-	)
+	).Order("id DESC")
 
 	if filter.CreatorId != nil {
 		query = query.Where("creator = ? OR moderator = ?", *filter.CreatorId, *filter.CreatorId)

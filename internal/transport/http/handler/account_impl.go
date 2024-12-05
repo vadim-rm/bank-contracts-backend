@@ -357,7 +357,7 @@ type completeAccountRequest struct {
 // @Failure 404 {object} errorResponse "Заявка на счёт не найдена"
 // @Failure 500 {object} errorResponse "Внутренняя ошибка сервера"
 // @Security Bearer
-// @Router /account/{accountId}/complete [post]
+// @Router /accounts/{accountId}/complete [put]
 func (h *AccountImpl) Complete(ctx *gin.Context) {
 	var request completeAccountRequest
 

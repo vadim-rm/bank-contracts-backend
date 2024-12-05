@@ -113,13 +113,13 @@ definitions:
       createdAt:
         type: string
       creator:
-        type: integer
+        type: string
       finishedAt:
         type: string
       id:
         type: integer
       moderator:
-        type: integer
+        type: string
       number:
         type: string
       requestedAt:
@@ -134,13 +134,13 @@ definitions:
       createdAt:
         type: string
       creator:
-        type: integer
+        type: string
       finishedAt:
         type: string
       id:
         type: integer
       moderator:
-        type: integer
+        type: string
       number:
         type: string
       requestedAt:
@@ -190,45 +190,6 @@ info:
   title: BMSTU Web Backend
   version: "1.0"
 paths:
-  /account/{accountId}/complete:
-    post:
-      consumes:
-      - application/json
-      description: Завершает заявку на счёт, обновляя её статус по ID заявки.
-      parameters:
-      - description: ID заявки на счёт
-        in: path
-        name: accountId
-        required: true
-        type: integer
-      - description: Данные для завершения заявки
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/handler.completeAccountRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Заявка на счёт успешно завершена
-        "400":
-          description: Неверный запрос
-          schema:
-            $ref: '#/definitions/handler.errorResponse'
-        "404":
-          description: Заявка на счёт не найдена
-          schema:
-            $ref: '#/definitions/handler.errorResponse'
-        "500":
-          description: Внутренняя ошибка сервера
-          schema:
-            $ref: '#/definitions/handler.errorResponse'
-      security:
-      - Bearer: []
-      summary: Завершение заявки на счёт
-      tags:
-      - accounts
   /accounts:
     get:
       consumes:
@@ -374,6 +335,45 @@ paths:
       security:
       - Bearer: []
       summary: Обновление информации о заявке на счёт
+      tags:
+      - accounts
+  /accounts/{accountId}/complete:
+    put:
+      consumes:
+      - application/json
+      description: Завершает заявку на счёт, обновляя её статус по ID заявки.
+      parameters:
+      - description: ID заявки на счёт
+        in: path
+        name: accountId
+        required: true
+        type: integer
+      - description: Данные для завершения заявки
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.completeAccountRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Заявка на счёт успешно завершена
+        "400":
+          description: Неверный запрос
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "404":
+          description: Заявка на счёт не найдена
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      security:
+      - Bearer: []
+      summary: Завершение заявки на счёт
       tags:
       - accounts
   /accounts/{accountId}/contract/{contractId}:
@@ -638,6 +638,8 @@ paths:
       responses:
         "200":
           description: Договор успешно обновлен
+          schema:
+            $ref: '#/definitions/handler.contractResponse'
         "400":
           description: Неверный запрос
           schema:
@@ -710,6 +712,8 @@ paths:
       responses:
         "200":
           description: Изображение успешно обновлено
+          schema:
+            $ref: '#/definitions/handler.contractResponse'
         "400":
           description: Неверный запрос
           schema:

@@ -210,7 +210,7 @@ type updateRequest struct {
 // @Produce  json
 // @Param id path int true "ID договора"
 // @Param request body updateRequest true "Данные для обновления договора"
-// @Success 200 "Договор успешно обновлен"
+// @Success 200 {object} contractResponse "Договор успешно обновлен"
 // @Failure 400 {object} errorResponse "Неверный запрос"
 // @Failure 404 {object} errorResponse "Договор не найден"
 // @Failure 500 {object} errorResponse "Внутренняя ошибка сервера"
@@ -239,7 +239,20 @@ func (h *ContractImpl) Update(ctx *gin.Context) {
 		return
 	}
 
-	ctx.Status(http.StatusOK)
+	contract, err := h.contractService.Get(ctx, domain.ContractId(request.Id))
+	if err != nil {
+		newErrorResponse(ctx, err)
+		return
+	}
+
+	ctx.JSON(http.StatusOK, contractResponse{
+		Id:          int(contract.Id),
+		Name:        contract.Name,
+		Fee:         contract.Fee,
+		Description: contract.Description,
+		ImageUrl:    contract.ImageUrl,
+		Type:        string(contract.Type),
+	})
 }
 
 type deleteContractRequest struct {
@@ -320,7 +333,7 @@ type updateImageRequest struct {
 // @Produce  json
 // @Param id path int true "ID договора"
 // @Param image formData file true "Файл изображения для загрузки"
-// @Success 200 "Изображение успешно обновлено"
+// @Success 200 {object} contractResponse "Изображение успешно обновлено"
 // @Failure 400 {object} errorResponse "Неверный запрос"
 // @Failure 404 {object} errorResponse "Договор не найден"
 // @Failure 500 {object} errorResponse "Внутренняя ошибка сервера"
@@ -350,5 +363,18 @@ func (h *ContractImpl) UpdateImage(ctx *gin.Context) {
 		return
 	}
 
-	ctx.Status(http.StatusOK)
+	contract, err := h.contractService.Get(ctx, domain.ContractId(request.Id))
+	if err != nil {
+		newErrorResponse(ctx, err)
+		return
+	}
+
+	ctx.JSON(http.StatusOK, contractResponse{
+		Id:          int(contract.Id),
+		Name:        contract.Name,
+		Fee:         contract.Fee,
+		Description: contract.Description,
+		ImageUrl:    contract.ImageUrl,
+		Type:        string(contract.Type),
+	})
 }
