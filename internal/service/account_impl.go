@@ -100,18 +100,12 @@ func (s *AccountImpl) Submit(ctx context.Context, id domain.AccountId) error {
 		return domain.ErrInvalidTargetStatus
 	}
 
-	var totalFee int32
-	for _, contract := range account.Contracts {
-		totalFee += contract.Fee
-	}
-
 	status := domain.AccountStatusApplied
 
 	now := time.Now()
 	return s.repository.Update(ctx, id, repository.UpdateAccountInput{
 		RequestedAt: &now,
 		Status:      &status,
-		TotalFee:    &totalFee,
 	})
 }
 
@@ -131,11 +125,17 @@ func (s *AccountImpl) Complete(ctx context.Context, id domain.AccountId, status 
 		return fmt.Errorf("error getting claims: %w", err)
 	}
 
+	var totalFee int32
+	for _, contract := range account.Contracts {
+		totalFee += contract.Fee
+	}
+
 	now := time.Now()
 	return s.repository.Update(ctx, id, repository.UpdateAccountInput{
 		Moderator:  &claims.UserId,
 		FinishedAt: &now,
 		Status:     &status,
+		TotalFee:   &totalFee,
 	})
 }
 
