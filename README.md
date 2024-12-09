@@ -3,7 +3,9 @@
 Система для поиска банковских договоров и формирования заявок на открытие счёта в рамках выбранных договоров,
 включающая в себя веб-сервис, веб-приложение и десктопное приложение.
 
+> Проект создан в рамках курса "Разработка интернет-приложений" (МГТУ им. Н.Э. Баумана, ИУ5, 5 семестр)
+
 Смежные репозитории:
 
-- фронтенд (React, RTK, Vite): https://github.com/vadim-rm/bmstu-web-frontend
-- backend (Golang, gin, gorm): https://github.com/vadim-rm/bmstu-web-backend (этот репозиторий)
+- фронтенд (React, RTK, Vite): https://github.com/vadim-rm/bank-contracts-frontend
+- backend (Golang, gin, gorm): https://github.com/vadim-rm/bank-contracts-backend (этот репозиторий)
